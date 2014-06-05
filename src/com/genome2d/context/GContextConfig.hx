@@ -24,7 +24,7 @@ class GContextConfig {
             nativeStage.height = Std.int(viewRect.height);
             Browser.document.body.appendChild(nativeStage);
         }
-        contextClass = GCanvasContext;
-        //contextClass = GWebGLContext;
+        //contextClass = GCanvasContext;
+        contextClass = GWebGLContext;
     }
 }

@@ -108,7 +108,7 @@ class GContextTexture
     }
 
     static private var g2d_instanceCount:Int = 0;
-	public function new(p_context:IContext, p_id:String, p_sourceType:Int, p_source:Dynamic, p_region:GRectangle, p_format:String, p_pivotX:Float = 0, p_pivotY:Float = 0) {
+	public function new(p_context:IContext, p_id:String, p_sourceType:Int, p_source:Dynamic, p_region:GRectangle, p_format:String, p_repeatable:Bool, p_pivotX:Float, p_pivotY:Float) {
         if (g2d_references == null) g2d_references = new Map<String, GContextTexture>();
         if (p_id == null || p_id.length == 0) throw "Invalid textures id";
         if (g2d_references.get(p_id) != null) throw "Duplicate textures id";

@@ -1,5 +1,5 @@
 package com.genome2d.context.webgl;
-import com.genome2d.context.webgl.materials.GMaterialCommon;
+import com.genome2d.context.webgl.renderers.GRendererCommon;
 import js.html.webgl.UniformLocation;
 import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
@@ -14,7 +14,7 @@ import com.genome2d.signals.GKeyboardSignal;
 import com.genome2d.signals.GMouseSignal;
 import js.html.CanvasElement;
 import com.genome2d.context.filters.GFilter;
-import com.genome2d.context.webgl.materials.GDrawTextureCameraVertexShaderBatchMaterial;
+import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
 import js.html.webgl.RenderingContext;
 /**
  * ...
@@ -38,7 +38,7 @@ class GWebGLContext implements IContext
         return g2d_nativeContext;
     }
 
-	private var g2d_drawMaterial:GDrawTextureCameraVertexShaderBatchMaterial;
+	private var g2d_drawRenderer:GQuadTextureShaderRenderer;
 
     private var g2d_activeCamera:GContextCamera;
     private var g2d_defaultCamera:GContextCamera;
@@ -101,10 +101,10 @@ class GWebGLContext implements IContext
             return;
         }
 
-        GMaterialCommon.init();
+        GRendererCommon.init();
 
-        g2d_drawMaterial = new GDrawTextureCameraVertexShaderBatchMaterial();
-        g2d_drawMaterial.initialize(g2d_nativeContext);
+        g2d_drawRenderer = new GQuadTextureShaderRenderer();
+        g2d_drawRenderer.initialize(g2d_nativeContext);
 
         g2d_defaultCamera = new GContextCamera();
         g2d_defaultCamera.x = g2d_stageViewRect.width/2;
@@ -154,20 +154,28 @@ class GWebGLContext implements IContext
     }
 	
 	public function draw(p_texture:GContextTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
-        g2d_drawMaterial.bind(g2d_projectionMatrix);
-        g2d_drawMaterial.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_texture);
+        g2d_drawRenderer.bind(g2d_projectionMatrix);
+        g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_texture);
     }
 
     public function drawMatrix(p_texture:GContextTexture, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
 
     }
 
-    public function drawPoly(p_texture:GContextTexture, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
+    public function drawSource(p_texture:GContextTexture, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+
+    }
+
+    public function drawPoly(p_texture:GContextTexture, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
+
+    }
+
+    public function bindRenderer(p_renderer:Dynamic):Void {
 
     }
 	
 	public function end():Void {
-		g2d_drawMaterial.push();
+		g2d_drawRenderer.push();
     }
 
     public function clearStencil():Void {
@@ -209,6 +217,14 @@ class GWebGLContext implements IContext
     }
 
     public function dispose():Void {
+
+    }
+
+    public function setDepthTest(p_depthMask:Bool, p_compareMode:Dynamic):Void {
+
+    }
+
+    public function setRenderTargets(p_textures:Array<GContextTexture>, p_transform:GMatrix3D = null):Void {
 
     }
 }

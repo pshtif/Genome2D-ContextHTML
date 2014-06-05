@@ -12,10 +12,14 @@ class GTextureFactory {
     static public var g2d_context:IContext;
 
     static public function createFromImage(p_id:String, p_image:ImageElement):GTexture {
-		return new GTexture(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), "");
+		return new GTexture(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), "", false, 0, 0, null);
 	}
 
     static public function createFromAsset(p_id:String, p_imageAsset:GImageAsset):GTexture {
         return createFromImage(p_id, p_imageAsset.g2d_nativeImage);
+    }
+
+    static public function createRenderTexture(p_id:String, p_width:Int, p_height:Int):GTexture {
+        return null;
     }
 }
