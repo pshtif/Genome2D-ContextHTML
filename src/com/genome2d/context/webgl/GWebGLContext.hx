@@ -1,6 +1,5 @@
 package com.genome2d.context.webgl;
 import com.genome2d.context.webgl.renderers.GRendererCommon;
-import js.html.webgl.UniformLocation;
 import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.context.stats.GStats;
