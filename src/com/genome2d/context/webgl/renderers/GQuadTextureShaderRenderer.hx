@@ -1,5 +1,7 @@
 package com.genome2d.context.webgl.renderers;
 
+import com.genome2d.context.stats.GStats;
+import com.genome2d.context.webgl.renderers.IGRenderer;
 import js.html.Uint16Array;
 import js.html.webgl.Texture;
 import js.html.webgl.Shader;
@@ -8,31 +10,17 @@ import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
 import com.genome2d.textures.GContextTexture;
-import com.genome2d.textures.GTexture;
 import js.html.Float32Array;
 
-class GQuadTextureShaderRenderer
+class GQuadTextureShaderRenderer implements IGRenderer
 {
-    inline static private var BATCH_SIZE:Int = 10;
+    inline static private var BATCH_SIZE:Int = 20;
 
     inline static private var TRANSFORM_PER_VERTEX:Int = 3;
     inline static private var TRANSFORM_PER_VERTEX_ALPHA:Int = TRANSFORM_PER_VERTEX+1;
 
-    private var g2d_nativeContext:RenderingContext;
-	private var g2d_quadCount:Int = 0;
-	
-	private var g2d_geometryBuffer:Buffer;
-    private var g2d_uvBuffer:Buffer;
-    private var g2d_shaderIndexBuffer:Buffer;
-
-    private var g2d_indexBuffer:Buffer;
-
-    private var g2d_activeNativeTexture:Texture;
-
-    private var g2d_transforms:Float32Array;
-
-	inline static private var VERTEX_SHADER_CODE:String = 
-         "
+    inline static private var VERTEX_SHADER_CODE:String =
+    "
 			uniform mat4 projectionMatrix;
 			uniform vec4 transforms[50];
 
@@ -52,8 +40,8 @@ class GQuadTextureShaderRenderer
 			}
 		 ";
 
-	inline static private var FRAGMENT_SHADER_CODE:String =
-        "
+    inline static private var FRAGMENT_SHADER_CODE:String =
+    "
 			#ifdef GL_ES
 			precision highp float;
 			#endif
@@ -70,9 +58,26 @@ class GQuadTextureShaderRenderer
 			}
 		";
 
+    private var g2d_nativeContext:RenderingContext;
+	private var g2d_quadCount:Int = 0;
+	
+	private var g2d_geometryBuffer:Buffer;
+    private var g2d_uvBuffer:Buffer;
+    private var g2d_shaderIndexBuffer:Buffer;
+
+    private var g2d_indexBuffer:Buffer;
+
+    private var g2d_activeNativeTexture:Texture;
+
+    private var g2d_transforms:Float32Array;
+    private var g2d_context:GWebGLContext;
+
+    private var g2d_initialized:Bool;
+
 	public var g2d_program:Dynamic;
 	
 	public function new():Void {
+        g2d_initialized = false;
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -88,8 +93,9 @@ class GQuadTextureShaderRenderer
         return shader;
     }
 
-    public function initialize(p_context:RenderingContext):Void {
-		g2d_nativeContext = p_context;
+    public function initialize(p_context:GWebGLContext):Void {
+        g2d_context = p_context;
+		g2d_nativeContext = g2d_context.getNativeContext();
 		
 		var fragmentShader = getShader(FRAGMENT_SHADER_CODE, RenderingContext.FRAGMENT_SHADER);
 		var vertexShader = getShader(VERTEX_SHADER_CODE, RenderingContext.VERTEX_SHADER);
@@ -182,11 +188,15 @@ class GQuadTextureShaderRenderer
         g2d_program.shaderIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aShaderIndex");
         g2d_nativeContext.enableVertexAttribArray(g2d_program.shaderIndexAttribute);
 
-        g2d_transforms = new Float32Array(50*4);
+        g2d_transforms = new Float32Array(BATCH_SIZE*TRANSFORM_PER_VERTEX_ALPHA*4);
+        g2d_initialized = true;
 	}
 
-    public function bind(p_projection:Float32Array):Void {
-        g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  p_projection);
+    @:access(com.genome2d.context.webgl.GWebGLContext)
+    public function bind(p_context:GWebGLContext, p_reinitialize:Bool):Void {
+        if (!g2d_initialized || p_reinitialize) initialize(p_context);
+        // Bind camera matrix
+        g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
 
@@ -197,10 +207,10 @@ class GQuadTextureShaderRenderer
         g2d_nativeContext.vertexAttribPointer(g2d_program.texCoordAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_shaderIndexBuffer);
-        g2d_nativeContext.vertexAttribPointer(g2d_program.shaderIndexdAttribute, 3, RenderingContext.FLOAT, false, 0, 0);
+        g2d_nativeContext.vertexAttribPointer(g2d_program.shaderIndexAttribute, 3, RenderingContext.FLOAT, false, 0, 0);
     }
 	
-	public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_texture:GContextTexture):Void {
+	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_texture:GContextTexture):Void {
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
 
         if (notSameTexture) {
@@ -214,8 +224,6 @@ class GQuadTextureShaderRenderer
             }
         }
 
-        g2d_program.shaderIndexAttribute = g2d_nativeContext.getUniformLocation(g2d_program, "aShaderIndex");
-
         var offset:Int = g2d_quadCount*12;
         g2d_transforms[offset] = p_x;
         g2d_transforms[offset+1] = p_y;
@@ -227,17 +235,25 @@ class GQuadTextureShaderRenderer
         g2d_transforms[offset+6] = p_texture.uvScaleX;
         g2d_transforms[offset+7] = p_texture.uvScaleY;
 
+        g2d_transforms[offset+8] = 1;
+        g2d_transforms[offset+9] = 1;
+        g2d_transforms[offset+10] = 1;
+        g2d_transforms[offset+11] = 1;
+
 		g2d_quadCount++;
 
         if (g2d_quadCount == BATCH_SIZE) push();
 	}
 	
-	public function push():Void {
-        g2d_nativeContext.uniform4fv(g2d_nativeContext.getUniformLocation(g2d_program, "transforms"), g2d_transforms);
+	inline public function push():Void {
+        if (g2d_quadCount>0) {
+            GStats.drawCalls++;
+            g2d_nativeContext.uniform4fv(g2d_nativeContext.getUniformLocation(g2d_program, "transforms"), g2d_transforms);
 
-        g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6*g2d_quadCount, RenderingContext.UNSIGNED_SHORT, 0);
+            g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6*g2d_quadCount, RenderingContext.UNSIGNED_SHORT, 0);
 
-        g2d_quadCount = 0;
+            g2d_quadCount = 0;
+        }
     }
 
     public function clear():Void {

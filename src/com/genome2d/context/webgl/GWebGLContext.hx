@@ -104,7 +104,6 @@ class GWebGLContext implements IContext
         GRendererCommon.init();
 
         g2d_drawRenderer = new GQuadTextureShaderRenderer();
-        g2d_drawRenderer.initialize(g2d_nativeContext);
 
         g2d_defaultCamera = new GContextCamera();
         g2d_defaultCamera.x = g2d_stageViewRect.width/2;
@@ -127,7 +126,10 @@ class GWebGLContext implements IContext
     }
 
     public function setCamera(p_camera:GContextCamera):Void {
-
+        g2d_projectionMatrix = new Float32Array([2.0/g2d_stageViewRect.width, 0.0, 0.0, -1.0,
+                                                0.0, -2.0/g2d_stageViewRect.height, 0.0, 1.0,
+                                                0.0, 0.0, 1.0, 0.0,
+                                                0.0, 0.0, 0.0, 1.0]);
     }
 
     public function getMaskRect():GRectangle {
@@ -138,13 +140,8 @@ class GWebGLContext implements IContext
     }
 	
 	public function begin(p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_useDefaultCamera:Bool = true):Void {
+        g2d_stats.clear();
         g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
-
-        // Move to camera
-        g2d_projectionMatrix = new Float32Array([2.0/g2d_stageViewRect.width, 0.0, 0.0, -1.0,
-                                                 0.0, -2.0/g2d_stageViewRect.height, 0.0, 1.0,
-                                                 0.0, 0.0, 1.0, 0.0,
-                                                 0.0, 0.0, 0.0, 1.0]);
 
 		g2d_nativeContext.clearColor(p_red, p_green, p_blue, p_alpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
@@ -153,8 +150,9 @@ class GWebGLContext implements IContext
         g2d_nativeContext.blendFunc(RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA);
     }
 	
-	public function draw(p_texture:GContextTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
-        g2d_drawRenderer.bind(g2d_projectionMatrix);
+	inline public function draw(p_texture:GContextTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+        g2d_drawRenderer.bind(this, false);
+
         g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_texture);
     }
 
@@ -198,7 +196,7 @@ class GWebGLContext implements IContext
         var currentTime:Float = Date.now().getTime();
         g2d_currentDeltaTime = currentTime - g2d_currentTime;
         g2d_currentTime = currentTime;
-        //g2d_stats.render(this);
+        g2d_stats.render(this);
 
         if (g2d_onFrame != null) g2d_onFrame(g2d_currentDeltaTime);
         GRequestAnimationFrame.request(g2d_enterFrameHandler);

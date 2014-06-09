@@ -7,7 +7,6 @@ import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
 import com.genome2d.textures.GContextTexture;
-import com.genome2d.textures.GTexture;
 import js.html.Float32Array;
 
 class GQuadTextureBufferCPURenderer

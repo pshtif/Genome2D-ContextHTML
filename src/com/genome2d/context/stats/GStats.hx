@@ -64,7 +64,7 @@ class GStats implements IStats
             if ( time > g2d_previousTime + 1000 ) {
                 fps = Math.round( ( g2d_frames * 1000 ) / ( time - g2d_previousTime ) );
 
-                g2d_fpsText.textContent = 'FPS: ' + fps;
+                g2d_fpsText.textContent = 'FPS: ' + fps +" Drawcalls: " + drawCalls;
                 g2d_previousTime = time;
                 g2d_frames = 0;
             }
