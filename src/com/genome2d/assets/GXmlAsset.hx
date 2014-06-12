@@ -8,13 +8,7 @@ import js.Browser;
 class GXmlAsset extends GAsset {
     public var xml:Xml;
 
-    public function new(p_id:String, p_url:String) {
-        super(p_id, p_url);
-    }
-
-    override public function load(p_url:String = null):Void {
-        super.load(p_url);
-
+    override public function load():Void {
         var http:Http = new Http(g2d_url);
         http.onData = loadedHandler;
         http.onError = errorHandler;
@@ -22,6 +16,7 @@ class GXmlAsset extends GAsset {
     }
 
     private function loadedHandler(p_data:String):Void {
+        g2d_loaded = true;
         xml = Xml.parse(p_data);
         onLoaded.dispatch(this);
     }

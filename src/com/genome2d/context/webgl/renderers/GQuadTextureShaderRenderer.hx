@@ -14,7 +14,7 @@ import js.html.Float32Array;
 
 class GQuadTextureShaderRenderer implements IGRenderer
 {
-    inline static private var BATCH_SIZE:Int = 20;
+    inline static private var BATCH_SIZE:Int = 60;
 
     inline static private var TRANSFORM_PER_VERTEX:Int = 3;
     inline static private var TRANSFORM_PER_VERTEX_ALPHA:Int = TRANSFORM_PER_VERTEX+1;
@@ -22,21 +22,24 @@ class GQuadTextureShaderRenderer implements IGRenderer
     inline static private var VERTEX_SHADER_CODE:String =
     "
 			uniform mat4 projectionMatrix;
-			uniform vec4 transforms[50];
+			uniform vec4 transforms["+BATCH_SIZE*TRANSFORM_PER_VERTEX+"];
 
 			attribute vec2 aPosition;
 			attribute vec2 aTexCoord;
-			attribute vec3 aShaderIndex;
+			attribute vec3 aConstantIndex;
 
 			varying vec2 vTexCoord;
 
 			void main(void)
 			{
-				gl_Position = vec4(aPosition.x*transforms[int(aShaderIndex.x)].z, aPosition.y*transforms[int(aShaderIndex.x)].w, 0, 1);
-				gl_Position = vec4(gl_Position.x+transforms[int(aShaderIndex.x)].x, gl_Position.y+transforms[int(aShaderIndex.x)].y, 0, 1);
+				gl_Position = vec4(aPosition.x*transforms[int(aConstantIndex.z)].x, aPosition.y*transforms[int(aConstantIndex.z)].y, 0, 1);
+				float c = cos(transforms[int(aConstantIndex.x)].z);
+				float s = sin(transforms[int(aConstantIndex.x)].z);
+				gl_Position = vec4(gl_Position.x * c - gl_Position.y * s, gl_Position.x * s + gl_Position.y * c, 0, 1);
+				gl_Position = vec4(gl_Position.x+transforms[int(aConstantIndex.x)].x, gl_Position.y+transforms[int(aConstantIndex.x)].y, 0, 1);
 				gl_Position = gl_Position * projectionMatrix;
 
-				vTexCoord = vec2(aTexCoord.x*transforms[int(aShaderIndex.y)].z+transforms[int(aShaderIndex.y)].x, aTexCoord.y*transforms[int(aShaderIndex.y)].w+transforms[int(aShaderIndex.y)].y);
+				vTexCoord = vec2(aTexCoord.x*transforms[int(aConstantIndex.y)].z+transforms[int(aConstantIndex.y)].x, aTexCoord.y*transforms[int(aConstantIndex.y)].w+transforms[int(aConstantIndex.y)].y);
 			}
 		 ";
 
@@ -58,16 +61,63 @@ class GQuadTextureShaderRenderer implements IGRenderer
 			}
 		";
 
+    inline static private var VERTEX_SHADER_CODE_ALPHA:String =
+    "
+			uniform mat4 projectionMatrix;
+			uniform vec4 transforms["+BATCH_SIZE*TRANSFORM_PER_VERTEX_ALPHA+"];
+
+			attribute vec2 aPosition;
+			attribute vec2 aTexCoord;
+			attribute vec4 aConstantIndex;
+
+			varying vec2 vTexCoord;
+			varying vec4 vColor;
+
+			void main(void)
+			{
+				gl_Position = vec4(aPosition.x*transforms[int(aConstantIndex.z)].x, aPosition.y*transforms[int(aConstantIndex.z)].y, 0, 1);
+				float c = cos(transforms[int(aConstantIndex.x)].z);
+				float s = sin(transforms[int(aConstantIndex.x)].z);
+				gl_Position = vec4(gl_Position.x * c - gl_Position.y * s, gl_Position.x * s + gl_Position.y * c, 0, 1);
+				gl_Position = vec4(gl_Position.x+transforms[int(aConstantIndex.x)].x, gl_Position.y+transforms[int(aConstantIndex.x)].y, 0, 1);
+				gl_Position = gl_Position * projectionMatrix;
+
+				vTexCoord = vec2(aTexCoord.x*transforms[int(aConstantIndex.y)].z+transforms[int(aConstantIndex.y)].x, aTexCoord.y*transforms[int(aConstantIndex.y)].w+transforms[int(aConstantIndex.y)].y);
+				vColor = transforms[int(aConstantIndex.w)];
+			}
+		 ";
+
+    inline static private var FRAGMENT_SHADER_CODE_ALPHA:String =
+    "
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+
+			varying vec2 vTexCoord;
+			varying vec4 vColor;
+
+			uniform sampler2D sTexture;
+
+			void main(void)
+			{
+				gl_FragColor = texture2D(sTexture, vTexCoord) * vColor;
+			}
+		";
+
     private var g2d_nativeContext:RenderingContext;
 	private var g2d_quadCount:Int = 0;
 	
 	private var g2d_geometryBuffer:Buffer;
     private var g2d_uvBuffer:Buffer;
-    private var g2d_shaderIndexBuffer:Buffer;
+    private var g2d_constantIndexBuffer:Buffer;
+    private var g2d_constantIndexAlphaBuffer:Buffer;
 
     private var g2d_indexBuffer:Buffer;
 
     private var g2d_activeNativeTexture:Texture;
+    private var g2d_activeAlpha:Bool = false;
+
+    private var g2d_useSeparatedAlphaPipeline:Bool = false;
 
     private var g2d_transforms:Float32Array;
     private var g2d_context:GWebGLContext;
@@ -96,9 +146,11 @@ class GQuadTextureShaderRenderer implements IGRenderer
     public function initialize(p_context:GWebGLContext):Void {
         g2d_context = p_context;
 		g2d_nativeContext = g2d_context.getNativeContext();
+
+        //trace(g2d_nativeContext.getParameter(RenderingContext.MAX_VERTEX_UNIFORM_VECTORS));
 		
-		var fragmentShader = getShader(FRAGMENT_SHADER_CODE, RenderingContext.FRAGMENT_SHADER);
-		var vertexShader = getShader(VERTEX_SHADER_CODE, RenderingContext.VERTEX_SHADER);
+		var fragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
+		var vertexShader = getShader(VERTEX_SHADER_CODE_ALPHA, RenderingContext.VERTEX_SHADER);
 
 		g2d_program = g2d_nativeContext.createProgram();
 		g2d_nativeContext.attachShader(g2d_program, vertexShader);
@@ -112,7 +164,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         var vertices:Float32Array = new Float32Array(8*BATCH_SIZE);
         var uvs:Float32Array = new Float32Array(8*BATCH_SIZE);
         var registerIndices:Float32Array = new Float32Array(TRANSFORM_PER_VERTEX*BATCH_SIZE*4);
-        //var registerIndicesAlpha:Float32Array = new Float32Array();
+        var registerIndicesAlpha:Float32Array = new Float32Array(TRANSFORM_PER_VERTEX_ALPHA*BATCH_SIZE*4);
 
         for (i in 0...BATCH_SIZE) {
             vertices[i*8] = GRendererCommon.NORMALIZED_VERTICES[0];
@@ -134,19 +186,36 @@ class GQuadTextureShaderRenderer implements IGRenderer
             uvs[i*8+7] = GRendererCommon.NORMALIZED_UVS[7];
 
             var index:Int = (i * TRANSFORM_PER_VERTEX);
-            var array:Array<Float> = [index, index + 1, index + 2, index, index + 1, index + 2, index, index + 1, index + 2,  index, index + 1, index + 2];
-            registerIndices[i*TRANSFORM_PER_VERTEX*4] = index;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+1] = index+1;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+2] = index+2;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+3] = index;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+4] = index+1;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+5] = index+2;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+6] = index;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+7] = index+1;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+8] = index+2;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+9] = index;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+10] = index+1;
-            registerIndices[i*TRANSFORM_PER_VERTEX*4+11] = index+2;
+            registerIndices[index*4] = index;
+            registerIndices[index*4+1] = index+1;
+            registerIndices[index*4+2] = index+2;
+            registerIndices[index*4+3] = index;
+            registerIndices[index*4+4] = index+1;
+            registerIndices[index*4+5] = index+2;
+            registerIndices[index*4+6] = index;
+            registerIndices[index*4+7] = index+1;
+            registerIndices[index*4+8] = index+2;
+            registerIndices[index*4+9] = index;
+            registerIndices[index*4+10] = index+1;
+            registerIndices[index*4+11] = index+2;
+
+            var index:Int = (i * TRANSFORM_PER_VERTEX_ALPHA);
+            registerIndicesAlpha[index*4] = index;
+            registerIndicesAlpha[index*4+1] = index+1;
+            registerIndicesAlpha[index*4+2] = index+2;
+            registerIndicesAlpha[index*4+3] = index+3;
+            registerIndicesAlpha[index*4+4] = index;
+            registerIndicesAlpha[index*4+5] = index+1;
+            registerIndicesAlpha[index*4+6] = index+2;
+            registerIndicesAlpha[index*4+7] = index+3;
+            registerIndicesAlpha[index*4+8] = index;
+            registerIndicesAlpha[index*4+9] = index+1;
+            registerIndicesAlpha[index*4+10] = index+2;
+            registerIndicesAlpha[index*4+11] = index+3;
+            registerIndicesAlpha[index*4+12] = index;
+            registerIndicesAlpha[index*4+13] = index+1;
+            registerIndicesAlpha[index*4+14] = index+2;
+            registerIndicesAlpha[index*4+15] = index+3;
         }
 
         g2d_geometryBuffer = g2d_nativeContext.createBuffer();
@@ -157,9 +226,13 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_uvBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, uvs, RenderingContext.STREAM_DRAW);
 
-        g2d_shaderIndexBuffer = g2d_nativeContext.createBuffer();
-        g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_shaderIndexBuffer);
+        g2d_constantIndexBuffer = g2d_nativeContext.createBuffer();
+        g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_constantIndexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, registerIndices, RenderingContext.STREAM_DRAW);
+
+        g2d_constantIndexAlphaBuffer = g2d_nativeContext.createBuffer();
+        g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_constantIndexAlphaBuffer);
+        g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, registerIndicesAlpha, RenderingContext.STREAM_DRAW);
 
         var indices:Uint16Array = new Uint16Array(BATCH_SIZE * 6);
         for (i in 0...BATCH_SIZE) {
@@ -185,8 +258,8 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_program.texCoordAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aTexCoord");
         g2d_nativeContext.enableVertexAttribArray(g2d_program.texCoordAttribute);
 
-        g2d_program.shaderIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aShaderIndex");
-        g2d_nativeContext.enableVertexAttribArray(g2d_program.shaderIndexAttribute);
+        g2d_program.constantIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aConstantIndex");
+        g2d_nativeContext.enableVertexAttribArray(g2d_program.constantIndexAttribute);
 
         g2d_transforms = new Float32Array(BATCH_SIZE*TRANSFORM_PER_VERTEX_ALPHA*4);
         g2d_initialized = true;
@@ -206,12 +279,16 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_uvBuffer);
         g2d_nativeContext.vertexAttribPointer(g2d_program.texCoordAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
 
-        g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_shaderIndexBuffer);
-        g2d_nativeContext.vertexAttribPointer(g2d_program.shaderIndexAttribute, 3, RenderingContext.FLOAT, false, 0, 0);
+        g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_constantIndexAlphaBuffer);
+        g2d_nativeContext.vertexAttribPointer(g2d_program.constantIndexAttribute, 4, RenderingContext.FLOAT, false, 0, 0);
     }
 	
-	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_texture:GContextTexture):Void {
+	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GContextTexture):Void {
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
+        var useAlpha:Bool = !g2d_useSeparatedAlphaPipeline && !(p_red==1 && p_green==1 && p_blue==1 && p_alpha==1);
+        var notSameUseAlpha:Bool = g2d_activeAlpha != useAlpha;
+        // TODO: Change this if we implement separate alpha pipeline
+        g2d_activeAlpha = useAlpha;
 
         if (notSameTexture) {
             if (g2d_activeNativeTexture != null) push();
@@ -224,21 +301,34 @@ class GQuadTextureShaderRenderer implements IGRenderer
             }
         }
 
-        var offset:Int = g2d_quadCount*12;
+        // Alpha is active and texture uses premultiplied source
+        if (g2d_activeAlpha) {
+            p_red*=p_alpha;
+            p_green*=p_alpha;
+            p_blue*=p_alpha;
+        }
+        /**/
+
+        var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA*4;
         g2d_transforms[offset] = p_x;
         g2d_transforms[offset+1] = p_y;
-        g2d_transforms[offset+2] = p_scaleX*p_texture.width;
-        g2d_transforms[offset+3] = p_scaleY*p_texture.height;
+        g2d_transforms[offset+2] = p_rotation;
+        g2d_transforms[offset+3] = 0; // Reserved for id
 
         g2d_transforms[offset+4] = p_texture.uvX;
         g2d_transforms[offset+5] = p_texture.uvY;
         g2d_transforms[offset+6] = p_texture.uvScaleX;
         g2d_transforms[offset+7] = p_texture.uvScaleY;
 
-        g2d_transforms[offset+8] = 1;
-        g2d_transforms[offset+9] = 1;
-        g2d_transforms[offset+10] = 1;
-        g2d_transforms[offset+11] = 1;
+        g2d_transforms[offset+8] = p_scaleX*p_texture.width;
+        g2d_transforms[offset+9] = p_scaleY*p_texture.height;
+        g2d_transforms[offset+10] = p_scaleX*p_texture.pivotX;
+        g2d_transforms[offset+11] = p_scaleY*p_texture.pivotY;
+
+        g2d_transforms[offset+12] = p_red;
+        g2d_transforms[offset+13] = p_green;
+        g2d_transforms[offset+14] = p_blue;
+        g2d_transforms[offset+15] = p_alpha;
 
 		g2d_quadCount++;
 

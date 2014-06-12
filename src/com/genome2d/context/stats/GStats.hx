@@ -32,7 +32,7 @@ class GStats implements IStats
 
         g2d_container = Browser.document.createDivElement();
         g2d_container.id = 'stats';
-        g2d_container.style.cssText = 'width:80px;opacity:0.9;cursor:pointer';
+        g2d_container.style.cssText = 'width:'+p_canvas.clientWidth+'px;opacity:0.9;cursor:pointer';
         g2d_container.style.position = "absolute";
         g2d_container.style.left = p_canvas.offsetLeft+'px';
         g2d_container.style.top = p_canvas.offsetTop+'px';

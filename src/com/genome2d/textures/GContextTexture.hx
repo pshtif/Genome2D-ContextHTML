@@ -136,6 +136,7 @@ class GContextTexture
 						if (nativeTexture == null || p_reinitialize) {
 							nativeTexture = webglContext.getNativeContext().createTexture();
 						}
+
 						webglContext.getNativeContext().bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
 						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
 						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);

@@ -1,4 +1,6 @@
 package com.genome2d.context.canvas;
+
+#if !webGLonly
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.textures.GContextTexture;
 import js.html.Event;
@@ -242,3 +244,4 @@ class GCanvasContext implements IContext
 
     }
 }
+#end

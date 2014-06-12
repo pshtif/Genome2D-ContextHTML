@@ -1,4 +1,7 @@
 package com.genome2d.context.webgl;
+import com.genome2d.context.webgl.renderers.IGRenderer;
+import msignal.Signal.Signal0;
+import msignal.Signal.Signal1;
 import com.genome2d.context.webgl.renderers.GRendererCommon;
 import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
@@ -15,17 +18,19 @@ import js.html.CanvasElement;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
 import js.html.webgl.RenderingContext;
-/**
- * ...
- * @author Peter "sHTiF" Stefcek
- */
+
+#if webGLonly
+class GWebGLContext
+#else
 class GWebGLContext implements IContext
+#end
 {
     public function hasFeature(p_feature:Int):Bool {
         return false;
     }
 
     private var g2d_projectionMatrix:Float32Array;
+    private var g2d_reinitialize:Bool = false;
 
     private var g2d_nativeStage:CanvasElement;
     public function getNativeStage():CanvasElement {
@@ -38,6 +43,8 @@ class GWebGLContext implements IContext
     }
 
 	private var g2d_drawRenderer:GQuadTextureShaderRenderer;
+
+    private var g2d_activeRenderer:IGRenderer;
 
     private var g2d_activeCamera:GContextCamera;
     private var g2d_defaultCamera:GContextCamera;
@@ -55,37 +62,24 @@ class GWebGLContext implements IContext
     }
     private var g2d_activeViewRect:GRectangle;
 
-    private var g2d_onInitialized:Void->Void;
-    public function onInitialized(p_callback:Void->Void):Void {
-        g2d_onInitialized = p_callback;
-    }
-    private var g2d_onFailed:String->Void;
-    public function onFailed(p_callback:String->Void):Void {
-        g2d_onFailed = p_callback;
-    }
-    private var g2d_onInvalidated:Void->Void;
-    public function onInvalidated(p_callback:Void->Void):Void {
-        g2d_onInvalidated = p_callback;
-    }
-    private var g2d_onFrame:Float->Void;
-    public function onFrame(p_callback:Float->Void):Void {
-        g2d_onFrame = p_callback;
-    }
-
-    private var g2d_onMouseInteraction:GMouseSignal->Void;
-    public function onMouseInteraction(p_callback:GMouseSignal->Void):Void {
-        g2d_onMouseInteraction = p_callback;
-    }
-
-    private var g2d_onKeyboardInteraction:GKeyboardSignal->Void;
-    public function onKeyboardInteraction(p_callback:GKeyboardSignal->Void):Void {
-        g2d_onKeyboardInteraction = p_callback;
-    }
+    public var onInitialized(default,null):Signal0;
+    public var onFailed(default,null):Signal1<String>;
+    public var onInvalidated(default,null):Signal0;
+    public var onFrame(default,null):Signal1<Float>;
+    public var onMouseSignal(default,null):Signal1<GMouseSignal>;
+    public var onKeyboardSignal(default,null):Signal1<GKeyboardSignal>;
 
 	public function new(p_config:GContextConfig) {
         g2d_nativeStage = p_config.nativeStage;
         g2d_stageViewRect = p_config.viewRect;
         g2d_stats = new GStats(g2d_nativeStage);
+
+        onInitialized = new Signal0();
+        onFailed = new Signal1<String>();
+        onInvalidated = new Signal0();
+        onFrame = new Signal1<Float>();
+        onMouseSignal = new Signal1<GMouseSignal>();
+        onKeyboardSignal = new Signal1<GKeyboardSignal>();
     }
 	
 	public function init():Void {
@@ -96,7 +90,7 @@ class GWebGLContext implements IContext
         }
 
         if (g2d_nativeContext == null) {
-            if (g2d_onFailed != null) g2d_onFailed("No WebGL support detected.");
+            onFailed.dispatch("No WebGL support detected.");
             return;
         }
 
@@ -120,8 +114,10 @@ class GWebGLContext implements IContext
 		g2d_stage.addEventListener("touchmove", onTouchEvent);
 		/**/
 
+        g2d_nativeContext.pixelStorei(RenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, RenderingContext.ONE);
+
+        onInitialized.dispatch();
         GRequestAnimationFrame.request(g2d_enterFrameHandler);
-        if (g2d_onInitialized != null) g2d_onInitialized();
     }
 
     public function setCamera(p_camera:GContextCamera):Void {
@@ -140,19 +136,22 @@ class GWebGLContext implements IContext
 	
 	public function begin(p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_useDefaultCamera:Bool = true):Void {
         g2d_stats.clear();
+        g2d_activeRenderer = null;
+
+        setCamera(g2d_defaultCamera);
         g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
 
 		g2d_nativeContext.clearColor(p_red, p_green, p_blue, p_alpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
         g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
         g2d_nativeContext.enable(RenderingContext.BLEND);
-        g2d_nativeContext.blendFunc(RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA);
+        GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
     }
 	
 	inline public function draw(p_texture:GContextTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
-        g2d_drawRenderer.bind(this, false);
+        bindRenderer(g2d_drawRenderer);
 
-        g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_texture);
+        g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture);
     }
 
     public function drawMatrix(p_texture:GContextTexture, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
@@ -168,11 +167,24 @@ class GWebGLContext implements IContext
     }
 
     public function bindRenderer(p_renderer:Dynamic):Void {
+        if (p_renderer != g2d_activeRenderer || g2d_activeRenderer == null) {
+            if (g2d_activeRenderer != null) {
+                g2d_activeRenderer.push();
+                g2d_activeRenderer.clear();
+            }
 
+            g2d_activeRenderer = p_renderer;
+            g2d_activeRenderer.bind(this, g2d_reinitialize);
+        }
     }
 	
 	public function end():Void {
-		g2d_drawRenderer.push();
+        if (g2d_activeRenderer != null) {
+            g2d_activeRenderer.push();
+            g2d_activeRenderer.clear();
+        }
+
+        g2d_reinitialize = false;
     }
 
     public function clearStencil():Void {
@@ -197,7 +209,7 @@ class GWebGLContext implements IContext
         g2d_currentTime = currentTime;
         g2d_stats.render(this);
 
-        if (g2d_onFrame != null) g2d_onFrame(g2d_currentDeltaTime);
+        onFrame.dispatch(g2d_currentDeltaTime);
         GRequestAnimationFrame.request(g2d_enterFrameHandler);
     }
 
@@ -210,7 +222,7 @@ class GWebGLContext implements IContext
         var my:Float = me.pageY - g2d_nativeStage.offsetTop;
 
         var signal:GMouseSignal = new GMouseSignal(GMouseSignalType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
-        if (g2d_onMouseInteraction != null) g2d_onMouseInteraction(signal);
+        onMouseSignal.dispatch(signal);
     }
 
     public function dispose():Void {

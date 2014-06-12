@@ -12,17 +12,25 @@ class GAsset
 {
     private var g2d_url:String;
 
+    private var g2d_loaded:Bool = false;
+    public function isLoaded():Bool {
+        return g2d_loaded;
+    }
+
 	public var onLoaded(default,null):Signal1<GAsset>;
 
     public var id(default, null):String;
 
-	public function new(p_id:String, p_url:String) {
+	public function new(){
+        onLoaded = new Signal1(GAsset);
+    }
+
+    public function initUrl(p_id:String, p_url:String) {
         id = p_id;
         g2d_url = p_url;
-		onLoaded = new Signal1(GAsset);
 	}
 
-    public function load(p_url:String = null):Void {
-        if (p_url != null) g2d_url = p_url;
+    public function load():Void {
+
     }
 }
