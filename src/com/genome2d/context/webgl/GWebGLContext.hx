@@ -1,4 +1,5 @@
 package com.genome2d.context.webgl;
+import js.html.TouchEvent;
 import com.genome2d.context.webgl.renderers.IGRenderer;
 import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
@@ -108,10 +109,10 @@ class GWebGLContext implements IContext
         g2d_nativeStage.addEventListener("mousedown", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mouseup", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mousemove", g2d_mouseEventHandler);
-/*
-		g2d_stage.addEventListener("touchstart", onTouchEvent);
-		g2d_stage.addEventListener("touchend", onTouchEvent);
-		g2d_stage.addEventListener("touchmove", onTouchEvent);
+
+		g2d_nativeStage.addEventListener("touchstart", g2d_mouseEventHandler);
+		g2d_nativeStage.addEventListener("touchend", g2d_mouseEventHandler);
+		g2d_nativeStage.addEventListener("touchmove", g2d_mouseEventHandler);
 		/**/
 
         g2d_nativeContext.pixelStorei(RenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, RenderingContext.ONE);
@@ -217,9 +218,17 @@ class GWebGLContext implements IContext
         var captured:Bool = false;
         event.preventDefault();
         event.stopPropagation();
-        var me:MouseEvent = cast event;
-        var mx:Float = me.pageX - g2d_nativeStage.offsetLeft;
-        var my:Float = me.pageY - g2d_nativeStage.offsetTop;
+        var mx:Float;
+        var my:Float;
+        if (Std.is(event,MouseEvent)) {
+            var me:MouseEvent = cast event;
+            mx = me.pageX - g2d_nativeStage.offsetLeft;
+            my = me.pageY - g2d_nativeStage.offsetTop;
+        } else {
+            var te:TouchEvent = cast event;
+            mx = te.targetTouches[0].pageX;
+            my = te.targetTouches[0].pageY;
+        }
 
         var signal:GMouseSignal = new GMouseSignal(GMouseSignalType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
         onMouseSignal.dispatch(signal);

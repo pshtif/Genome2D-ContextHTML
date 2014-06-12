@@ -14,11 +14,12 @@ import js.html.Float32Array;
 
 class GQuadTextureShaderRenderer implements IGRenderer
 {
-    inline static private var BATCH_SIZE:Int = 60;
+    inline static private var BATCH_SIZE:Int = 30;
 
     inline static private var TRANSFORM_PER_VERTEX:Int = 3;
     inline static private var TRANSFORM_PER_VERTEX_ALPHA:Int = TRANSFORM_PER_VERTEX+1;
 
+    /*
     inline static private var VERTEX_SHADER_CODE:String =
     "
 			uniform mat4 projectionMatrix;
@@ -33,6 +34,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 			void main(void)
 			{
 				gl_Position = vec4(aPosition.x*transforms[int(aConstantIndex.z)].x, aPosition.y*transforms[int(aConstantIndex.z)].y, 0, 1);
+				gl_Position = vec4(gl_Position.x - transforms[int(aConstantIndex.z)].z, gl_Position.y - transforms[int(aConstantIndex.z)].w, 0, 1);
 				float c = cos(transforms[int(aConstantIndex.x)].z);
 				float s = sin(transforms[int(aConstantIndex.x)].z);
 				gl_Position = vec4(gl_Position.x * c - gl_Position.y * s, gl_Position.x * s + gl_Position.y * c, 0, 1);
@@ -60,7 +62,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 				gl_FragColor = texColor;
 			}
 		";
-
+    /**/
     inline static private var VERTEX_SHADER_CODE_ALPHA:String =
     "
 			uniform mat4 projectionMatrix;
@@ -76,6 +78,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 			void main(void)
 			{
 				gl_Position = vec4(aPosition.x*transforms[int(aConstantIndex.z)].x, aPosition.y*transforms[int(aConstantIndex.z)].y, 0, 1);
+				gl_Position = vec4(gl_Position.x - transforms[int(aConstantIndex.z)].z, gl_Position.y - transforms[int(aConstantIndex.z)].w, 0, 1);
 				float c = cos(transforms[int(aConstantIndex.x)].z);
 				float s = sin(transforms[int(aConstantIndex.x)].z);
 				gl_Position = vec4(gl_Position.x * c - gl_Position.y * s, gl_Position.x * s + gl_Position.y * c, 0, 1);

@@ -11,11 +11,11 @@ class GMouseSignalType {
     inline static public function fromNative(p_nativeType:String):String {
         var type:String = "";
         switch (p_nativeType) {
-            case "mousemove":
+            case "mousemove" | "touchmove":
                 type = MOUSE_MOVE;
-            case "mousedown":
+            case "mousedown" | "touchstart":
                 type = MOUSE_DOWN;
-            case "mouseup":
+            case "mouseup" | "touchend":
                 type = MOUSE_UP;
         }
 
