@@ -1,12 +1,18 @@
+/*
+* 	Genome2D - GPU 2D framework utilizing Molehill API
+*
+*	Copyright 2011 Peter Stefcek. All rights reserved.
+*
+*	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
+*/
 package com.genome2d.assets;
+
 import msignal.Signal.Signal1;
 
 import js.html.Event;
 
-/**
+/*
  * Simple asset class for alpha asset management, will be differentiated into multiple classes for different assets later
- * 
- * @author Peter "sHTiF" Stefcek / www.flash-core.com
  */
 class GAsset
 {

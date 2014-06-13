@@ -1,3 +1,10 @@
+/*
+* 	Genome2D - GPU 2D framework utilizing Molehill API
+*
+*	Copyright 2011 Peter Stefcek. All rights reserved.
+*
+*	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
+*/
 package com.genome2d.textures.factories;
 
 import com.genome2d.error.GError;
@@ -7,9 +14,6 @@ import com.genome2d.context.IContext;
 import com.genome2d.assets.GImageAsset;
 import com.genome2d.assets.GXmlAsset;
 
-/**
- * @author  Peter "sHTiF" Stefcek
- */
 class GTextureAtlasFactory
 {
     static public var g2d_context:IContext;

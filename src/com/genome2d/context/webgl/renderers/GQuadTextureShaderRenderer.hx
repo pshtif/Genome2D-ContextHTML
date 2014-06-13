@@ -1,3 +1,10 @@
+/*
+* 	Genome2D - GPU 2D framework utilizing Molehill API
+*
+*	Copyright 2011 Peter Stefcek. All rights reserved.
+*
+*	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
+*/
 package com.genome2d.context.webgl.renderers;
 
 import com.genome2d.context.stats.GStats;
@@ -92,9 +99,9 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
     inline static private var FRAGMENT_SHADER_CODE_ALPHA:String =
     "
-			#ifdef GL_ES
-			precision highp float;
-			#endif
+			//#ifdef GL_ES
+			precision lowp float;
+			//#endif
 
 			varying vec2 vTexCoord;
 			varying vec4 vColor;
@@ -138,7 +145,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.shaderSource(shader, shaderSrc);
         g2d_nativeContext.compileShader(shader);
 
-        /* Check for erros
+        // Check for erros
         if (!g2d_nativeContext.getShaderParameter(shader, RenderingContext.COMPILE_STATUS)) {
             trace("Shader compilation error: " + g2d_nativeContext.getShaderInfoLog(shader)); return null;
         }
@@ -150,7 +157,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_context = p_context;
 		g2d_nativeContext = g2d_context.getNativeContext();
 
-        //trace(g2d_nativeContext.getParameter(RenderingContext.MAX_VERTEX_UNIFORM_VECTORS));
+        trace(g2d_nativeContext.getParameter(RenderingContext.MAX_VERTEX_UNIFORM_VECTORS));
 		
 		var fragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
 		var vertexShader = getShader(VERTEX_SHADER_CODE_ALPHA, RenderingContext.VERTEX_SHADER);
