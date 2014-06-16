@@ -9,6 +9,9 @@ package com.genome2d.context;
 
 import js.html.webgl.RenderingContext;
 
+/**
+
+**/
 class GBlendMode
 {
 	private static var blendFactors:Array<Array<Array<Int>>> = [
