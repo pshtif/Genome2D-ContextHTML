@@ -7,6 +7,9 @@
 */
 package com.genome2d.context.filters;
 
+/**
+
+**/
 class GFilter {
     public var g2d_id:String;
     public var overrideFragmentShader:Bool = false;

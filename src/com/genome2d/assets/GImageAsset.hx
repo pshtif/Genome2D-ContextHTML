@@ -12,7 +12,11 @@ import js.html.ImageElement;
 import js.html.Event;
 import js.Browser;
 
-class GImageAsset extends GAsset {
+/**
+
+**/
+class GImageAsset extends GAsset
+{
     public var g2d_nativeImage:ImageElement;
 
     override public function load():Void {

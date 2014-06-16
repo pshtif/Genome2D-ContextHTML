@@ -28,9 +28,8 @@ import com.genome2d.textures.GTexture;
 import js.html.CanvasRenderingContext2D;
 
 /**
- * ...
- * @author Peter "sHTiF" Stefcek
- */
+
+**/
 class GCanvasContext implements IContext
 {
     public function hasFeature(p_feature:Int):Bool {

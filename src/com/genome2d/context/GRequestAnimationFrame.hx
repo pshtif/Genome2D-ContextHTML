@@ -9,7 +9,11 @@ package com.genome2d.context;
 
 import js.html.Document;
 
-class GRequestAnimationFrame {
+/**
+
+**/
+class GRequestAnimationFrame
+{
 
 	public static function request(method:Dynamic):Void {
 			

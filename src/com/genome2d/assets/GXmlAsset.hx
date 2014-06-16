@@ -12,7 +12,11 @@ import haxe.Http;
 import js.html.Event;
 import js.Browser;
 
-class GXmlAsset extends GAsset {
+/**
+
+**/
+class GXmlAsset extends GAsset
+{
     public var xml:Xml;
 
     override public function load():Void {

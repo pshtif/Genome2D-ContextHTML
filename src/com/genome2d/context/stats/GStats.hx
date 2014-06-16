@@ -13,6 +13,10 @@ import js.Browser;
 import js.html.DivElement;
 import js.html.Event;
 import js.html.Document;
+
+/**
+
+**/
 class GStats implements IStats
 {
     static public var fps:Int = 0;

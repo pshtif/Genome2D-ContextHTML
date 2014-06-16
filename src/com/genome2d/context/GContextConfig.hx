@@ -15,8 +15,12 @@ import com.genome2d.context.webgl.GWebGLContext;
 import com.genome2d.geom.GRectangle;
 import js.Browser;
 import js.html.CanvasElement;
-class GContextConfig {
-	
+
+/**
+
+**/
+class GContextConfig
+{
 	public var viewRect:GRectangle;
     public var enableStats:Bool = false;
     public var nativeStage:CanvasElement;

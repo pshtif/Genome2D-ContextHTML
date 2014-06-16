@@ -7,7 +7,11 @@
 */
 package com.genome2d.context;
 
-class GContextCamera {
+/**
+
+**/
+class GContextCamera
+{
     public var rotation:Float = 0;
     public var scaleX:Float = 1;
     public var scaleY:Float = 1;

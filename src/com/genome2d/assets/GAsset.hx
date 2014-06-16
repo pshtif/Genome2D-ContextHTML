@@ -11,9 +11,9 @@ import msignal.Signal.Signal1;
 
 import js.html.Event;
 
-/*
- * Simple asset class for alpha asset management, will be differentiated into multiple classes for different assets later
- */
+/**
+    Abstract asset superclass
+**/
 class GAsset
 {
     private var g2d_url:String;
