@@ -7,7 +7,6 @@
 */
 package com.genome2d.assets;
 
-import haxe.Http;
 import js.html.ImageElement;
 import js.html.Event;
 import js.Browser;
