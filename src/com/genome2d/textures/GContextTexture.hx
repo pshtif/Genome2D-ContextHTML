@@ -116,6 +116,10 @@ class GContextTexture
 		g2d_instanceCount++;
 		g2d_contextId = g2d_instanceCount;
         g2d_region = p_region;
+
+        var useRectangle:Bool = p_context.hasFeature(GContextFeature.RECTANGLE_TEXTURES);
+        g2d_gpuWidth = useRectangle ? width : GTextureUtils.getNextValidTextureSize(width);
+        g2d_gpuHeight = useRectangle ? height : GTextureUtils.getNextValidTextureSize(height);
 		
         g2d_references.set(p_id, this);
 
