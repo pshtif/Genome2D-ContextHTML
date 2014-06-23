@@ -56,6 +56,17 @@ class GWebGLContext implements IContext
 
     private var g2d_activeRenderer:IGRenderer;
 
+    private var g2d_backgroundRed:Float = 0;
+    private var g2d_backgroundGreen:Float = 0;
+    private var g2d_backgroundBlue:Float = 0;
+    private var g2d_backgroundAlpha:Float = 1;
+    public function setBackgroundRGBA(p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float = 1):Void {
+        g2d_backgroundRed = p_red;
+        g2d_backgroundGreen = p_green;
+        g2d_backgroundBlue = p_blue;
+        g2d_backgroundAlpha = p_alpha;
+    }
+
     private var g2d_activeCamera:GContextCamera;
     private var g2d_defaultCamera:GContextCamera;
     public function getDefaultCamera():GContextCamera {
@@ -144,14 +155,14 @@ class GWebGLContext implements IContext
 
     }
 	
-	public function begin(p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_useDefaultCamera:Bool = true):Void {
+	public function begin():Void {
         g2d_stats.clear();
         g2d_activeRenderer = null;
 
         setCamera(g2d_defaultCamera);
         g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
 
-		g2d_nativeContext.clearColor(p_red, p_green, p_blue, p_alpha);
+		g2d_nativeContext.clearColor(g2d_backgroundRed, g2d_backgroundGreen, g2d_backgroundBlue, g2d_backgroundAlpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
         g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
         g2d_nativeContext.enable(RenderingContext.BLEND);
