@@ -60,10 +60,10 @@ class GWebGLContext implements IContext
     private var g2d_backgroundGreen:Float = 0;
     private var g2d_backgroundBlue:Float = 0;
     private var g2d_backgroundAlpha:Float = 1;
-    public function setBackgroundRGBA(p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float = 1):Void {
-        g2d_backgroundRed = p_red;
-        g2d_backgroundGreen = p_green;
-        g2d_backgroundBlue = p_blue;
+    public function setBackgroundRGBA(p_color:Int, p_alpha:Float = 1):Void {
+        g2d_backgroundRed = Std.int(p_color >> 16 & 0xFF) / 0xFF;
+        g2d_backgroundGreen = Std.int(p_color >> 8 & 0xFF) / 0xFF;
+        g2d_backgroundBlue = Std.int(p_color & 0xFF) / 0xFF;
         g2d_backgroundAlpha = p_alpha;
     }
 

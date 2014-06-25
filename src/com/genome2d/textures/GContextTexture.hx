@@ -12,12 +12,14 @@ import com.genome2d.context.IContext;
 import com.genome2d.context.IContext;
 import com.genome2d.geom.GRectangle;
 import com.genome2d.textures.GContextTexture;
+import com.genome2d.context.GContextFeature;
 import com.genome2d.context.webgl.GWebGLContext;
+import com.genome2d.textures.GTextureType;
+import com.genome2d.textures.GTextureSourceType;
+
 import js.html.Image;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.Texture;
-import com.genome2d.textures.GTextureType;
-import com.genome2d.textures.GTextureSourceType;
 
 class GContextTexture
 {
