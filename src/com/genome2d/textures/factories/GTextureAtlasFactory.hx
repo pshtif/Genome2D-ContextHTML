@@ -41,22 +41,45 @@ class GTextureAtlasFactory
         return textureAtlas;
     }
 
-    static public function createFromImageAndFontXml(p_id:String, p_image:ImageElement, p_fontXml:Xml, p_format:String = "bgra"):GTextureAtlas {
-        if (!GTextureUtils.isValidTextureSize(p_image.width) || !GTextureUtils.isValidTextureSize(p_image.height)) new GError("Atlas bitmap needs to have power of 2 size.");
-        var textureAtlas:GTextureAtlas = new GTextureAtlas(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), p_format, null);
+    static public function createFromImageAndFontXml(p_id:String, p_image:ImageElement, p_fontXml:Xml, p_format:String = "bgra"):GFontTextureAtlas {
+        var textureAtlas:GFontTextureAtlas = new GFontTextureAtlas(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), p_format, null);
 
-        var root = p_fontXml.firstElement();
+        var root:Xml = p_fontXml.firstElement();
+
+        var common:Xml = root.elementsNamed("common").next();
+        textureAtlas.lineHeight = Std.parseInt(common.get("lineHeight"));
+
         var it:Iterator<Xml> = root.elementsNamed("chars");
         it = it.next().elements();
 
         while(it.hasNext()) {
             var node:Xml = it.next();
-            var region:GRectangle = new GRectangle(Std.parseInt(node.get("x")), Std.parseInt(node.get("y")), Std.parseInt(node.get("width")), Std.parseInt(node.get("height")));
+            var w:Int = Std.parseInt(node.get("width"));
+            var h:Int = Std.parseInt(node.get("height"));
+            var region:GRectangle = new GRectangle(Std.parseInt(node.get("x")), Std.parseInt(node.get("y")), w, h);
 
-            var pivotX:Float = -Std.parseFloat(node.get("xoffset"));
-            var pivotY:Float = -Std.parseFloat(node.get("yoffset"));
+            var subtexture:GCharTexture = textureAtlas.addSubTexture(node.get("id"), region, -w/2, -h/2);
+            subtexture.xoffset = Std.parseInt(node.get("xoffset"));
+            subtexture.yoffset = Std.parseInt(node.get("yoffset"));
+            subtexture.xadvance = Std.parseInt(node.get("xadvance"));
+        }
 
-            textureAtlas.addSubTexture(node.get("id"), region, pivotX, pivotY);
+        var kernings:Xml = root.elementsNamed("kernings").next();
+        if (kernings != null) {
+            it = kernings.elements();
+            textureAtlas.g2d_kerning = new Map<Int,Map<Int,Int>>();
+
+            while(it.hasNext()) {
+                var node:Xml = it.next();
+                var first:Int = Std.parseInt(node.get("first"));
+                var map:Map<Int,Int> = textureAtlas.g2d_kerning.get(first);
+                if (map == null) {
+                    map = new Map<Int,Int>();
+                    textureAtlas.g2d_kerning.set(first, map);
+                }
+                var second:Int = Std.parseInt(node.get("second"));
+                map.set(second, Std.parseInt("amount"));
+            }
         }
 
         textureAtlas.invalidateNativeTexture(false);
@@ -67,7 +90,7 @@ class GTextureAtlasFactory
         return createFromImageAndXml(p_id, p_imageAsset.g2d_nativeImage, p_xmlAsset.xml, p_format);
     }
 
-    static public function createFontFromAssets(p_id:String, p_imageAsset:GImageAsset, p_xmlAsset:GXmlAsset, p_format:String = "bgra"):GTextureAtlas {
+    static public function createFontFromAssets(p_id:String, p_imageAsset:GImageAsset, p_xmlAsset:GXmlAsset, p_format:String = "bgra"):GFontTextureAtlas {
         return createFromImageAndFontXml(p_id, p_imageAsset.g2d_nativeImage, p_xmlAsset.xml, p_format);
     }
 }
