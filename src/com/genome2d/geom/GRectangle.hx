@@ -49,16 +49,16 @@ class GRectangle {
         return new GRectangle(x,y,width,height);
     }
 
-    public function intersection (toFloatersect:GRectangle):GRectangle {
+    public function intersection(p_rect:GRectangle):GRectangle {
         var result:GRectangle;
 
-        var x0 = x < toFloatersect.x ? toFloatersect.x : x;
-        var x1 = right > toFloatersect.right ? toFloatersect.right : right;
+        var x0 = x < p_rect.x ? p_rect.x : x;
+        var x1 = right > p_rect.right ? p_rect.right : right;
         if (x1 <= x0) {
             result = new GRectangle ();
         } else {
-            var y0 = y < toFloatersect.y ? toFloatersect.y : y;
-            var y1 = bottom > toFloatersect.bottom ? toFloatersect.bottom : bottom;
+            var y0 = y < p_rect.y ? p_rect.y : y;
+            var y1 = bottom > p_rect.bottom ? p_rect.bottom : bottom;
             if (y1 <= y0) {
                 result = new GRectangle ();
             } else {
