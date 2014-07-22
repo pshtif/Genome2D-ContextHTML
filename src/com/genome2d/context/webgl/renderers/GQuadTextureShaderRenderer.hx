@@ -320,7 +320,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         }
         /**/
 
-        var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA*4;
+        var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA<<2;
         g2d_transforms[offset] = p_x;
         g2d_transforms[offset+1] = p_y;
         g2d_transforms[offset+2] = p_rotation;

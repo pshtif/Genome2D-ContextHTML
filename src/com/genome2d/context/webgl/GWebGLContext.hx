@@ -36,6 +36,11 @@ class GWebGLContext implements IContext
 #end
 {
     public function hasFeature(p_feature:Int):Bool {
+        switch (p_feature) {
+            case GContextFeature.RECTANGLE_TEXTURES:
+                return true;
+        }
+
         return false;
     }
 
@@ -187,7 +192,7 @@ class GWebGLContext implements IContext
 
     }
 
-    public function bindRenderer(p_renderer:Dynamic):Void {
+    inline public function bindRenderer(p_renderer:Dynamic):Void {
         if (p_renderer != g2d_activeRenderer || g2d_activeRenderer == null) {
             if (g2d_activeRenderer != null) {
                 g2d_activeRenderer.push();

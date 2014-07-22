@@ -143,9 +143,12 @@ class GContextTexture
 						}
 
 						webglContext.getNativeContext().bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
+                        webglContext.getNativeContext().texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, cast g2d_nativeSource);
 						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
 						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
-						webglContext.getNativeContext().texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, cast g2d_nativeSource);
+                        webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_S, RenderingContext.CLAMP_TO_EDGE);
+                        webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_T, RenderingContext.CLAMP_TO_EDGE);
+
                         webglContext.getNativeContext().bindTexture(RenderingContext.TEXTURE_2D, null);
 					default:
 				}
