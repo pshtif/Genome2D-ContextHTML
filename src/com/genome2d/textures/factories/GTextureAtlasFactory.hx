@@ -41,8 +41,8 @@ class GTextureAtlasFactory
         return textureAtlas;
     }
 
-    static public function createFromImageAndFontXml(p_id:String, p_image:ImageElement, p_fontXml:Xml, p_format:String = "bgra"):GFontTextureAtlas {
-        var textureAtlas:GFontTextureAtlas = new GFontTextureAtlas(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), p_format, null);
+    static public function createFromImageAndFontXml(p_id:String, p_image:ImageElement, p_fontXml:Xml, p_format:String = "bgra"):GTextureFontAtlas {
+        var textureAtlas:GTextureFontAtlas = new GTextureFontAtlas(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), p_format, null);
 
         var root:Xml = p_fontXml.firstElement();
 
@@ -90,7 +90,7 @@ class GTextureAtlasFactory
         return createFromImageAndXml(p_id, p_imageAsset.g2d_nativeImage, p_xmlAsset.xml, p_format);
     }
 
-    static public function createFontFromAssets(p_id:String, p_imageAsset:GImageAsset, p_xmlAsset:GXmlAsset, p_format:String = "bgra"):GFontTextureAtlas {
+    static public function createFontFromAssets(p_id:String, p_imageAsset:GImageAsset, p_xmlAsset:GXmlAsset, p_format:String = "bgra"):GTextureFontAtlas {
         return createFromImageAndFontXml(p_id, p_imageAsset.g2d_nativeImage, p_xmlAsset.xml, p_format);
     }
 }
