@@ -157,8 +157,6 @@ class GQuadTextureShaderRenderer implements IGRenderer
     public function initialize(p_context:GWebGLContext):Void {
         g2d_context = p_context;
 		g2d_nativeContext = g2d_context.getNativeContext();
-
-        trace(g2d_nativeContext.getParameter(RenderingContext.MAX_VERTEX_UNIFORM_VECTORS));
 		
 		var fragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
 		var vertexShader = getShader(VERTEX_SHADER_CODE_ALPHA, RenderingContext.VERTEX_SHADER);
