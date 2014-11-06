@@ -42,9 +42,9 @@ class GCanvasContext implements IContext
         return g2d_nativeStage;
     }
 
-    private var g2d_activeCamera:GContextCamera;
-    private var g2d_defaultCamera:GContextCamera;
-    public function getDefaultCamera():GContextCamera {
+    private var g2d_activeCamera:GCamera;
+    private var g2d_defaultCamera:GCamera;
+    public function getDefaultCamera():GCamera {
         return g2d_defaultCamera;
     }
 
@@ -101,7 +101,7 @@ class GCanvasContext implements IContext
 	public function init():Void {
 		g2d_nativeContext =  g2d_nativeStage.getContext("2d");
 
-        g2d_defaultCamera = new GContextCamera();
+        g2d_defaultCamera = new GCamera();
         g2d_defaultCamera.x = g2d_stageViewRect.width/2;
         g2d_defaultCamera.y = g2d_stageViewRect.height/2;
 
@@ -128,7 +128,7 @@ class GCanvasContext implements IContext
         g2d_activeMaskRect = p_maskRect;
     }
 
-    public function setCamera(p_camera:GContextCamera):Void {
+    public function setCamera(p_camera:GCamera):Void {
         g2d_activeCamera = p_camera;
 
         g2d_activeViewRect.setTo(Std.int(g2d_stageViewRect.width*g2d_activeCamera.normalizedViewX),

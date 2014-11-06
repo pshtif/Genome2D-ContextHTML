@@ -72,9 +72,9 @@ class GWebGLContext implements IContext
         g2d_backgroundAlpha = p_alpha;
     }
 
-    private var g2d_activeCamera:GContextCamera;
-    private var g2d_defaultCamera:GContextCamera;
-    public function getDefaultCamera():GContextCamera {
+    private var g2d_activeCamera:GCamera;
+    private var g2d_defaultCamera:GCamera;
+    public function getDefaultCamera():GCamera {
         return g2d_defaultCamera;
     }
 
@@ -124,7 +124,7 @@ class GWebGLContext implements IContext
 
         g2d_drawRenderer = new GQuadTextureShaderRenderer();
 
-        g2d_defaultCamera = new GContextCamera();
+        g2d_defaultCamera = new GCamera();
         g2d_defaultCamera.x = g2d_stageViewRect.width/2;
         g2d_defaultCamera.y = g2d_stageViewRect.height/2;
 
@@ -146,7 +146,7 @@ class GWebGLContext implements IContext
         GRequestAnimationFrame.request(g2d_enterFrameHandler);
     }
 
-    public function setCamera(p_camera:GContextCamera):Void {
+    public function setCamera(p_camera:GCamera):Void {
         g2d_projectionMatrix = new Float32Array([2.0/g2d_stageViewRect.width, 0.0, 0.0, -1.0,
                                                 0.0, -2.0/g2d_stageViewRect.height, 0.0, 1.0,
                                                 0.0, 0.0, 1.0, 0.0,
