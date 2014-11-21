@@ -310,7 +310,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
             }
         }
 
-        // Alpha is active and texture uses premultiplied source
+        // Alpha is active and textures uses premultiplied source
         if (g2d_activeAlpha) {
             p_red*=p_alpha;
             p_green*=p_alpha;
