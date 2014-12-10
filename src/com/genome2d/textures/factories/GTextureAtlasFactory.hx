@@ -87,10 +87,10 @@ class GTextureAtlasFactory
     }
 
     static public function createFromAssets(p_id:String, p_imageAsset:GImageAsset, p_xmlAsset:GXmlAsset, p_format:String = "bgra"):GTextureAtlas {
-        return createFromImageAndXml(p_id, p_imageAsset.g2d_nativeImage, p_xmlAsset.xml, p_format);
+        return createFromImageAndXml(p_id, p_imageAsset.g2d_bitmapData, p_xmlAsset.xml, p_format);
     }
 
     static public function createFontFromAssets(p_id:String, p_imageAsset:GImageAsset, p_xmlAsset:GXmlAsset, p_format:String = "bgra"):GTextureFontAtlas {
-        return createFromImageAndFontXml(p_id, p_imageAsset.g2d_nativeImage, p_xmlAsset.xml, p_format);
+        return createFromImageAndFontXml(p_id, p_imageAsset.g2d_bitmapData, p_xmlAsset.xml, p_format);
     }
 }

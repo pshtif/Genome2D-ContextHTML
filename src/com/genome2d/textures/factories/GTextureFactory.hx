@@ -24,7 +24,7 @@ class GTextureFactory {
 	}
 
     static public function createFromAsset(p_id:String, p_imageAsset:GImageAsset):GTexture {
-        return createFromImage(p_id, p_imageAsset.g2d_nativeImage);
+        return createFromImage(p_id, p_imageAsset.g2d_bitmapData);
     }
 
     static public function createRenderTexture(p_id:String, p_width:Int, p_height:Int):GTexture {
