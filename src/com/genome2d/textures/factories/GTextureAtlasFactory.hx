@@ -8,7 +8,7 @@
  */
 package com.genome2d.textures.factories;
 
-import com.genome2d.error.GError;
+import com.genome2d.debug.GDebug;
 import com.genome2d.geom.GRectangle;
 import js.html.ImageElement;
 import com.genome2d.context.IContext;
@@ -20,7 +20,7 @@ class GTextureAtlasFactory
     static public var g2d_context:IContext;
 
     static public function createFromImageAndXml(p_id:String, p_image:ImageElement, p_xml:Xml, p_format:String = "bgra"):GTextureAtlas {
-        if (!GTextureUtils.isValidTextureSize(p_image.width) || !GTextureUtils.isValidTextureSize(p_image.height)) new GError("Atlas bitmap needs to have power of 2 size.");
+        if (!GTextureUtils.isValidTextureSize(p_image.width) || !GTextureUtils.isValidTextureSize(p_image.height)) GDebug.error("Atlas bitmap needs to have power of 2 size.");
         var textureAtlas:GTextureAtlas = new GTextureAtlas(g2d_context, p_id, GTextureSourceType.IMAGE, p_image, new GRectangle(0,0,p_image.width,p_image.height), p_format, null);
 
         var root = p_xml.firstElement();

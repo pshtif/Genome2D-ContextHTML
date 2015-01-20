@@ -10,7 +10,6 @@ package com.genome2d.textures.factories;
 
 import js.html.ImageElement;
 import com.genome2d.context.IContext;
-import com.genome2d.error.GError;
 import com.genome2d.geom.GRectangle;
 import com.genome2d.assets.GImageAsset;
 import com.genome2d.textures.factories.GTextureFactory;

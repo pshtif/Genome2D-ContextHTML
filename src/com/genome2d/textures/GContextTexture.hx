@@ -8,7 +8,7 @@
  */
 package com.genome2d.textures;
 
-import com.genome2d.error.GError;
+import com.genome2d.debug.GDebug;
 import com.genome2d.context.IContext;
 import com.genome2d.context.IContext;
 import com.genome2d.geom.GRectangle;
@@ -112,8 +112,8 @@ class GContextTexture
     @:dox(hide)
 	public function new(p_context:IContext, p_id:String, p_sourceType:Int, p_source:Dynamic, p_region:GRectangle, p_format:String, p_repeatable:Bool, p_pivotX:Float, p_pivotY:Float) {
         if (g2d_references == null) g2d_references = new Map<String, GContextTexture>();
-        if (p_id == null || p_id.length == 0) new GError("Invalid textures id.");
-        if (g2d_references.get(p_id) != null) new GError("Duplicate textures id.");
+        if (p_id == null || p_id.length == 0) GDebug.error("Invalid textures id.");
+        if (g2d_references.get(p_id) != null) GDebug.error("Duplicate textures id.");
 
         g2d_format = p_format;
 		g2d_instanceCount++;

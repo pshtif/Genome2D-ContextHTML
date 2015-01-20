@@ -8,7 +8,7 @@
  */
 package com.genome2d.assets;
 
-import com.genome2d.error.GError;
+import com.genome2d.debug.GDebug;
 import haxe.Http;
 import js.html.Event;
 import js.Browser;
@@ -34,6 +34,6 @@ class GXmlAsset extends GAsset
     }
 
     private function errorHandler(p_error:String):Void {
-        new GError(p_error);
+        GDebug.error(p_error);
     }
 }

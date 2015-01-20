@@ -9,7 +9,7 @@
 package com.genome2d.context;
 
 import com.genome2d.geom.GRectangle;
-import com.genome2d.error.GError;
+import com.genome2d.debug.GDebug;
 import com.genome2d.context.stats.IStats;
 import com.genome2d.context.canvas.GCanvasContext;
 import com.genome2d.context.webgl.GWebGLContext;
@@ -36,7 +36,7 @@ class GContextConfig
 		viewRect = p_viewRect;
         if (nativeStage == null) {
             if (p_viewRect == null) {
-                new GError("No canvas found");
+                GDebug.error("No canvas found");
             }
 
             nativeStage = Browser.document.createCanvasElement();
