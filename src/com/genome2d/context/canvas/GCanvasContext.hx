@@ -12,10 +12,10 @@ package com.genome2d.context.canvas;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.textures.GContextTexture;
 import js.html.Event;
-import com.genome2d.signals.GMouseSignalType;
+import com.genome2d.input.GMouseInputType;
 import js.html.MouseEvent;
-import com.genome2d.signals.GKeyboardSignal;
-import com.genome2d.signals.GMouseSignal;
+import com.genome2d.signals.GKeyboardInput;
+import com.genome2d.input.GMouseInput;
 import com.genome2d.context.stats.IStats;
 import com.genome2d.context.stats.GStats;
 import com.genome2d.geom.GRectangle;
@@ -82,13 +82,13 @@ class GCanvasContext implements IContext
         g2d_onFrame = p_callback;
     }
 
-    private var g2d_onMouseInteraction:GMouseSignal->Void;
-    public function onMouseInteraction(p_callback:GMouseSignal->Void):Void {
+    private var g2d_onMouseInteraction:GMouseInput->Void;
+    public function onMouseInteraction(p_callback:GMouseInput->Void):Void {
         g2d_onMouseInteraction = p_callback;
     }
 
-    private var g2d_onKeyboardInteraction:GKeyboardSignal->Void;
-    public function onKeyboardInteraction(p_callback:GKeyboardSignal->Void):Void {
+    private var g2d_onKeyboardInteraction:GKeyboardInput->Void;
+    public function onKeyboardInteraction(p_callback:GKeyboardInput->Void):Void {
         g2d_onKeyboardInteraction = p_callback;
     }
 	
@@ -239,7 +239,7 @@ class GCanvasContext implements IContext
         var mx:Float = me.pageX - g2d_nativeStage.offsetLeft;
         var my:Float = me.pageY - g2d_nativeStage.offsetTop;
 
-        var signal:GMouseSignal = new GMouseSignal(GMouseSignalType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
+        var signal:GMouseInput = new GMouseInput(GMouseInputType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
         if (g2d_onMouseInteraction != null) g2d_onMouseInteraction(signal);
     }
 

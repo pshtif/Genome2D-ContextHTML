@@ -17,13 +17,13 @@ import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.context.stats.GStats;
 import com.genome2d.textures.GContextTexture;
-import com.genome2d.signals.GMouseSignalType;
+import com.genome2d.input.GMouseInputType;
 import js.html.Event;
 import js.html.MouseEvent;
 import com.genome2d.context.stats.IStats;
 import com.genome2d.geom.GRectangle;
-import com.genome2d.signals.GKeyboardSignal;
-import com.genome2d.signals.GMouseSignal;
+import com.genome2d.signals.GKeyboardInput;
+import com.genome2d.input.GMouseInput;
 import js.html.CanvasElement;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
@@ -92,8 +92,8 @@ class GWebGLContext implements IContext
     public var onFailed(default,null):Signal1<String>;
     public var onInvalidated(default,null):Signal0;
     public var onFrame(default,null):Signal1<Float>;
-    public var onMouseSignal(default,null):Signal1<GMouseSignal>;
-    public var onKeyboardSignal(default,null):Signal1<GKeyboardSignal>;
+    public var onMouseSignal(default,null):Signal1<GMouseInput>;
+    public var onKeyboardSignal(default,null):Signal1<GKeyboardInput>;
 
 	public function new(p_config:GContextConfig) {
         g2d_nativeStage = p_config.nativeStage;
@@ -104,8 +104,8 @@ class GWebGLContext implements IContext
         onFailed = new Signal1<String>();
         onInvalidated = new Signal0();
         onFrame = new Signal1<Float>();
-        onMouseSignal = new Signal1<GMouseSignal>();
-        onKeyboardSignal = new Signal1<GKeyboardSignal>();
+        onMouseSignal = new Signal1<GMouseInput>();
+        onKeyboardSignal = new Signal1<GKeyboardInput>();
     }
 	
 	public function init():Void {
@@ -255,7 +255,7 @@ class GWebGLContext implements IContext
             my = te.targetTouches[0].pageY;
         }
 
-        var signal:GMouseSignal = new GMouseSignal(GMouseSignalType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
+        var signal:GMouseInput = new GMouseInput(GMouseInputType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
         onMouseSignal.dispatch(signal);
     }
 
