@@ -29,7 +29,7 @@ import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
 import js.html.webgl.RenderingContext;
 
-#if webGLonly
+#if webglonly
 class GWebGLContext
 #else
 class GWebGLContext implements IContext

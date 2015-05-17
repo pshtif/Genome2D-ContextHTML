@@ -8,7 +8,7 @@
  */
 package com.genome2d.context.canvas;
 
-#if !webGLonly
+#if !webglonly
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.textures.GContextTexture;
 import js.html.Event;

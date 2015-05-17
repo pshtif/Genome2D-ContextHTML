@@ -9,8 +9,7 @@
 package com.genome2d.textures;
 
 import com.genome2d.debug.GDebug;
-import com.genome2d.context.IContext;
-import com.genome2d.context.IContext;
+import com.genome2d.context.IGContext;
 import com.genome2d.geom.GRectangle;
 import com.genome2d.textures.GContextTexture;
 import com.genome2d.context.GContextFeature;
