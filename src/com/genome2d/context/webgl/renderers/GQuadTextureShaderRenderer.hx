@@ -10,6 +10,7 @@ package com.genome2d.context.webgl.renderers;
 
 import com.genome2d.context.stats.GStats;
 import com.genome2d.context.webgl.renderers.IGRenderer;
+import com.genome2d.debug.GDebug;
 import js.html.Uint16Array;
 import js.html.webgl.Texture;
 import js.html.webgl.Shader;
@@ -148,7 +149,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
         // Check for erros
         if (!g2d_nativeContext.getShaderParameter(shader, RenderingContext.COMPILE_STATUS)) {
-            trace("Shader compilation error: " + g2d_nativeContext.getShaderInfoLog(shader)); return null;
+            GDebug.error("Shader compilation error: " + g2d_nativeContext.getShaderInfoLog(shader)); return null;
         }
         /**/
         return shader;
