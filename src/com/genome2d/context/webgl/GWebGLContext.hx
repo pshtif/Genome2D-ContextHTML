@@ -8,31 +8,33 @@
  */
 package com.genome2d.context.webgl;
 
+import com.genome2d.callbacks.GCallback.GCallback0;
+import com.genome2d.callbacks.GCallback.GCallback1;
+import com.genome2d.callbacks.GCallback.GCallback2;
+import com.genome2d.input.IGInteractive;
+import com.genome2d.textures.GTexture;
 import js.html.TouchEvent;
 import com.genome2d.context.webgl.renderers.IGRenderer;
-import msignal.Signal.Signal0;
-import msignal.Signal.Signal1;
 import com.genome2d.context.webgl.renderers.GRendererCommon;
 import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.context.stats.GStats;
-import com.genome2d.textures.GContextTexture;
 import com.genome2d.input.GMouseInputType;
 import js.html.Event;
 import js.html.MouseEvent;
-import com.genome2d.context.stats.IStats;
+import com.genome2d.context.stats.IGStats;
 import com.genome2d.geom.GRectangle;
-import com.genome2d.signals.GKeyboardInput;
+import com.genome2d.input.GKeyboardInput;
 import com.genome2d.input.GMouseInput;
 import js.html.CanvasElement;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
 import js.html.webgl.RenderingContext;
 
-#if webglonly
-class GWebGLContext
+#if genome_webglonly
+class GWebGLContext implements IGInteractive
 #else
-class GWebGLContext implements IContext
+class GWebGLContext implements IGContext implements IGInteractive
 #end
 {
     public function hasFeature(p_feature:Int):Bool {
@@ -65,7 +67,7 @@ class GWebGLContext implements IContext
     private var g2d_backgroundGreen:Float = 0;
     private var g2d_backgroundBlue:Float = 0;
     private var g2d_backgroundAlpha:Float = 1;
-    public function setBackgroundRGBA(p_color:Int, p_alpha:Float = 1):Void {
+    public function setBackgroundColor(p_color:Int, p_alpha:Float = 1):Void {
         g2d_backgroundRed = Std.int(p_color >> 16 & 0xFF) / 0xFF;
         g2d_backgroundGreen = Std.int(p_color >> 8 & 0xFF) / 0xFF;
         g2d_backgroundBlue = Std.int(p_color & 0xFF) / 0xFF;
@@ -73,6 +75,9 @@ class GWebGLContext implements IContext
     }
 
     private var g2d_activeCamera:GCamera;
+	public function getActiveCamera():GCamera {
+        return g2d_activeCamera;
+    }
     private var g2d_defaultCamera:GCamera;
     public function getDefaultCamera():GCamera {
         return g2d_defaultCamera;
@@ -80,32 +85,36 @@ class GWebGLContext implements IContext
 
     private var g2d_currentDeltaTime:Float;
     private var g2d_currentTime:Float;
-    private var g2d_stats:IStats;
+    private var g2d_stats:IGStats;
 
     private var g2d_stageViewRect:GRectangle;
     inline public function getStageViewRect():GRectangle {
         return g2d_stageViewRect;
     }
     private var g2d_activeViewRect:GRectangle;
-
-    public var onInitialized(default,null):Signal0;
-    public var onFailed(default,null):Signal1<String>;
-    public var onInvalidated(default,null):Signal0;
-    public var onFrame(default,null):Signal1<Float>;
-    public var onMouseSignal(default,null):Signal1<GMouseInput>;
-    public var onKeyboardSignal(default,null):Signal1<GKeyboardInput>;
+	
+    public var onInitialized(default,null):GCallback0;
+    public var onFailed(default,null):GCallback1<String>;
+    public var onInvalidated(default, null):GCallback0;
+	public var onResize(default,null):GCallback2<Int,Int>;
+    public var onFrame(default,null):GCallback1<Float>;
+    public var onMouseInput(default,null):GCallback1<GMouseInput>;
+    public var onKeyboardInput(default, null):GCallback1<GKeyboardInput>;
+	
+	public var g2d_onMouseInputInternal:GMouseInput->Void;
 
 	public function new(p_config:GContextConfig) {
         g2d_nativeStage = p_config.nativeStage;
         g2d_stageViewRect = p_config.viewRect;
         g2d_stats = new GStats(g2d_nativeStage);
 
-        onInitialized = new Signal0();
-        onFailed = new Signal1<String>();
-        onInvalidated = new Signal0();
-        onFrame = new Signal1<Float>();
-        onMouseSignal = new Signal1<GMouseInput>();
-        onKeyboardSignal = new Signal1<GKeyboardInput>();
+        onInitialized = new GCallback0();
+        onFailed = new GCallback1<String>();
+        onInvalidated = new GCallback0();
+		onResize = new GCallback2<Int,Int>();
+        onFrame = new GCallback1<Float>();
+        onMouseInput = new GCallback1<GMouseInput>();
+        onKeyboardInput = new GCallback1<GKeyboardInput>();
     }
 	
 	public function init():Void {
@@ -145,8 +154,12 @@ class GWebGLContext implements IContext
         onInitialized.dispatch();
         GRequestAnimationFrame.request(g2d_enterFrameHandler);
     }
+	
+	public function resize(p_rect:GRectangle):Void {
+		
+	}
 
-    public function setCamera(p_camera:GCamera):Void {
+    public function setActiveCamera(p_camera:GCamera):Void {
         g2d_projectionMatrix = new Float32Array([2.0/g2d_stageViewRect.width, 0.0, 0.0, -1.0,
                                                 0.0, -2.0/g2d_stageViewRect.height, 0.0, 1.0,
                                                 0.0, 0.0, 1.0, 0.0,
@@ -160,11 +173,11 @@ class GWebGLContext implements IContext
 
     }
 	
-	public function begin():Void {
+	public function begin():Bool {
         g2d_stats.clear();
         g2d_activeRenderer = null;
 
-        setCamera(g2d_defaultCamera);
+        setActiveCamera(g2d_defaultCamera);
         g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
 
 		g2d_nativeContext.clearColor(g2d_backgroundRed, g2d_backgroundGreen, g2d_backgroundBlue, g2d_backgroundAlpha);
@@ -172,23 +185,24 @@ class GWebGLContext implements IContext
         g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
         g2d_nativeContext.enable(RenderingContext.BLEND);
         GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
+		
+		return true;
     }
 	
-	inline public function draw(p_texture:GContextTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+	inline public function draw(p_texture:GTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
         bindRenderer(g2d_drawRenderer);
-
         g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture);
     }
 
-    public function drawMatrix(p_texture:GContextTexture, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
+    public function drawMatrix(p_texture:GTexture, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
 
     }
 
-    public function drawSource(p_texture:GContextTexture, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+    public function drawSource(p_texture:GTexture, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
 
     }
 
-    public function drawPoly(p_texture:GContextTexture, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
+    public function drawPoly(p_texture:GTexture, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
 
     }
 
@@ -224,8 +238,16 @@ class GWebGLContext implements IContext
     public function renderToColor(p_stencilLayer:Int):Void {
 
     }
+	
+	public function getRenderTargetMatrix():GMatrix3D {
+		return null;
+	}
+	
+	public function getRenderTarget():GTexture {
+		return null;
+	}
 
-    public function setRenderTarget(p_texture:GContextTexture = null, p_transform:GMatrix3D = null):Void {
+    public function setRenderTarget(p_texture:GTexture = null, p_transform:GMatrix3D = null, p_clear:Bool = false):Void {
 
     }
 
@@ -255,19 +277,33 @@ class GWebGLContext implements IContext
             my = te.targetTouches[0].pageY;
         }
 
-        var signal:GMouseInput = new GMouseInput(GMouseInputType.fromNative(event.type), mx, my, captured);// event.buttonDown, event.ctrlKey,
-        onMouseSignal.dispatch(signal);
+        var input:GMouseInput = new GMouseInput(this, this, GMouseInputType.fromNative(event.type), mx, my);
+		input.worldX = input.contextX = mx;
+		input.worldY = input.contextY = my;
+        input.buttonDown = false;
+        input.ctrlKey = false;
+        input.altKey = false;
+        input.shiftKey = false;
+        input.delta = 0;
+		input.nativeCaptured = captured;
+		
+        onMouseInput.dispatch(input);
+		g2d_onMouseInputInternal(input);
     }
 
     public function dispose():Void {
-
+		g2d_onMouseInputInternal = null;
     }
 
     public function setDepthTest(p_depthMask:Bool, p_compareMode:Dynamic):Void {
 
     }
 
-    public function setRenderTargets(p_textures:Array<GContextTexture>, p_transform:GMatrix3D = null):Void {
+    public function setRenderTargets(p_textures:Array<GTexture>, p_transform:GMatrix3D = null, p_clear:Bool = false):Void {
 
     }
+	
+	public function setBlendMode(p_blendMode:Int, p_premultiplied:Bool):Void {
+		
+	}
 }

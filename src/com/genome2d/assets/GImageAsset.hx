@@ -17,15 +17,28 @@ import js.Browser;
 **/
 class GImageAsset extends GAsset
 {
-    public var g2d_nativeImage:ImageElement;
+    public var g2d_imageElement:ImageElement;
+    public var imageElement(get,never):ImageElement;
+    inline private function get_imageElement():ImageElement {
+        return g2d_imageElement;
+    }
+	
+	private var g2d_type:Int;
+    #if swc @:extern #end
+    public var type(get,never):Int;
+    #if swc @:getter(type) #end
+    inline private function get_type():Int {
+        return g2d_type;
+    }
 
     override public function load():Void {
-		g2d_nativeImage = Browser.document.createImageElement();
-		g2d_nativeImage.onload = loadedHandler;
-		g2d_nativeImage.src = g2d_url;
+		g2d_imageElement = Browser.document.createImageElement();
+		g2d_imageElement.onload = loadedHandler;
+		g2d_imageElement.src = g2d_url;
     }
 
     private function loadedHandler(event:Event):Void {
+		g2d_type = GImageAssetType.IMAGEELEMENT;
         g2d_loaded = true;
         onLoaded.dispatch(this);
     }

@@ -11,139 +11,64 @@ package com.genome2d.textures;
 import com.genome2d.debug.GDebug;
 import com.genome2d.context.IGContext;
 import com.genome2d.geom.GRectangle;
-import com.genome2d.textures.GContextTexture;
 import com.genome2d.context.GContextFeature;
 import com.genome2d.context.webgl.GWebGLContext;
-import com.genome2d.textures.GTextureType;
 import com.genome2d.textures.GTextureSourceType;
 
 import js.html.Image;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.Texture;
+import js.html.ImageElement;
 
-class GContextTexture
+class GTexture extends GTextureBase
 {
-    static public var g2d_references:Map<String,GContextTexture>;
-    static public function getContextTextureById(p_id:String):GContextTexture {
-        return g2d_references.get(p_id);
-    }
-
-    static public function invalidateAll(p_force:Bool) {
-        if (g2d_references != null) {
-            for (key in g2d_references.keys()) {
-                g2d_references.get(key).invalidateNativeTexture(p_force);
+	override public function setSource(p_value:Dynamic):Dynamic {
+        if (g2d_source != p_value) {
+            g2d_dirty = true;
+			g2d_source = p_value;
+            if (Std.is(g2d_source, ImageElement)) {
+				var imageElement:ImageElement = cast g2d_source;
+                g2d_sourceType = GTextureSourceType.IMAGE;
+                g2d_nativeWidth = imageElement.width;
+                g2d_nativeHeight = imageElement.height;
+                premultiplied = true;
+            } else if (Std.is(g2d_source,GRectangle)) {
+                g2d_sourceType = GTextureSourceType.RENDER_TARGET;
+                g2d_nativeWidth = p_value.width;
+                g2d_nativeHeight = p_value.height;
+            } else if (Std.is(g2d_source, GTexture)) {
+				var parent:GTexture = cast g2d_source;
+				parent.onInvalidated.add(parentInvalidated_handler);
+				parent.onDisposed.add(parentDisposed_handler);
+				g2d_gpuWidth = parent.g2d_gpuWidth;
+				g2d_gpuHeight = parent.g2d_gpuHeight;
+				g2d_nativeWidth = parent.g2d_nativeWidth;
+				g2d_nativeHeight = parent.g2d_nativeHeight;
+				g2d_nativeTexture = parent.nativeTexture;
+				g2d_sourceType = GTextureSourceType.TEXTURE;
+			} else {
+                GDebug.error("Invalid texture source.");
             }
+            g2d_dirty = true;
         }
+        return g2d_source;
     }
-
-    private var g2d_context:IContext;
-    private var g2d_nativeSource:Dynamic;
-    public function getNativeSource():Dynamic {
-        return g2d_nativeSource;
-    }
-
-    public var g2d_sourceType:Int;
-    private var g2d_type:Int;
-    inline public function getType():Int {
-        return g2d_type;
-    }
-
-    public var g2d_contextId:Int;
-    private var g2d_id:String;
-    inline public function getId():String {
-        return g2d_id;
-    }
-
-    public var width(get, never):Int;
-    inline private function get_width():Int {
-        return Std.int(g2d_region.width);
-    }
-
-    public var height(get, never):Int;
-    inline private function get_height():Int {
-        return Std.int(g2d_region.height);
-    }
-
-    private var g2d_gpuWidth:Int = 0;
-    public var gpuWidth(get, never):Int;
-    inline private function get_gpuWidth():Int {
-        return g2d_gpuWidth;
-    }
-
-    private var g2d_gpuHeight:Int = 0;
-    public var gpuHeight(get, never):Int;
-    inline private function get_gpuHeight():Int {
-        return g2d_gpuHeight;
-    }
-
-    @:allow(com.genome2d.context.canvas)
-    private var g2d_region:GRectangle;
-    private var g2d_parentAtlas:GContextTexture;
-
-    public var uvX:Float = 0;
-    public var uvY:Float = 0;
-    public var uvScaleX:Float = 1;
-    public var uvScaleY:Float = 1;
-
-    public var pivotX:Float = 0;
-    public var pivotY:Float = 0;
-
-    public var nativeTexture:Texture;
-    public var g2d_nativeImage:Image;
-
-    private var g2d_format:String;
-
-    //public var g2d_atfType:String = "";
-    public var g2d_premultiplied:Bool = true;
-
-    static public var defaultFilteringType:Int = 1;
-
-    public var g2d_filteringType:Int;
-    inline public function getFilteringType():Int {
-        return g2d_filteringType;
-    }
-    inline public function setFilteringType(p_value:Int):Int {
-    // TODO check for valid filtering type
-        return g2d_filteringType = p_value;
-    }
-
-    static private var g2d_instanceCount:Int = 0;
-    @:dox(hide)
-	public function new(p_context:IContext, p_id:String, p_sourceType:Int, p_source:Dynamic, p_region:GRectangle, p_format:String, p_repeatable:Bool, p_pivotX:Float, p_pivotY:Float) {
-        if (g2d_references == null) g2d_references = new Map<String, GContextTexture>();
-        if (p_id == null || p_id.length == 0) GDebug.error("Invalid textures id.");
-        if (g2d_references.get(p_id) != null) GDebug.error("Duplicate textures id.");
-
-        g2d_format = p_format;
-		g2d_instanceCount++;
-		g2d_contextId = g2d_instanceCount;
-        g2d_region = p_region;
-
-        var useRectangle:Bool = p_context.hasFeature(GContextFeature.RECTANGLE_TEXTURES);
-        g2d_gpuWidth = useRectangle ? width : GTextureUtils.getNextValidTextureSize(width);
-        g2d_gpuHeight = useRectangle ? height : GTextureUtils.getNextValidTextureSize(height);
-		
-        g2d_references.set(p_id, this);
-
-        g2d_context = p_context;
-        g2d_id = p_id;
-        g2d_sourceType = p_sourceType;
-        g2d_nativeSource = p_source;
-        g2d_filteringType = defaultFilteringType;
-	}
-
+	
     public function invalidateNativeTexture(p_reinitialize:Bool):Void {
 		if (Std.is(g2d_context, GWebGLContext)) {
 			var webglContext:GWebGLContext = cast g2d_context;
-			if (g2d_type != GTextureType.SUBTEXTURE) {
+			if (g2d_sourceType != GTextureSourceType.TEXTURE) {
+				g2d_gpuWidth = usesRectangle() ? g2d_nativeWidth : GTextureUtils.getNextValidTextureSize(g2d_nativeWidth);
+                g2d_gpuHeight = usesRectangle() ? g2d_nativeHeight : GTextureUtils.getNextValidTextureSize(g2d_nativeHeight);
+				
 				switch (g2d_sourceType) {
 					case GTextureSourceType.IMAGE:
 						if (nativeTexture == null || p_reinitialize) {
-							nativeTexture = webglContext.getNativeContext().createTexture();
+							g2d_nativeTexture = webglContext.getNativeContext().createTexture();
 						}
 
 						webglContext.getNativeContext().bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
-                        webglContext.getNativeContext().texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, cast g2d_nativeSource);
+                        webglContext.getNativeContext().texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, cast g2d_source);
 						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
 						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
                         webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_S, RenderingContext.CLAMP_TO_EDGE);
@@ -154,15 +79,31 @@ class GContextTexture
 				}
 			}
 		} else {
-			g2d_nativeImage = cast g2d_nativeSource;
+			//g2d_nativeImage = cast g2d_nativeSource;
 		}
     }
-
-    public function getAlphaAtUV(p_u:Float, p_v:Float):Float {
-        return 1;
+	
+	/****************************************************************************************************
+	 * 	GPU DEPENDANT PROPERTIES
+	 ****************************************************************************************************/
+	
+	private var g2d_nativeTexture:Texture;
+	/**
+	 * 	Native texture reference
+	 */
+    #if swc @:extern #end
+    public var nativeTexture(get,never):Texture;
+    #if swc @:getter(nativeTexture) #end
+    inline private function get_nativeTexture():Texture {
+        return g2d_nativeTexture;
     }
-
-    public function dispose():Void {
-
+	
+	/**
+	 * 	Check if this texture has same gpu texture as the passed texture
+	 *
+	 * 	@param p_texture
+	 */
+    public function hasSameGPUTexture(p_texture:GTexture):Bool {
+        return p_texture.nativeTexture == nativeTexture;
     }
 }

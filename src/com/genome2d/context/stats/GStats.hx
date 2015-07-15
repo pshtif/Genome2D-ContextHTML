@@ -8,7 +8,7 @@
  */
 package com.genome2d.context.stats;
 
-import com.genome2d.context.IContext;
+import com.genome2d.context.IGContext;
 import js.html.Element;
 import js.Browser;
 import js.html.DivElement;
@@ -18,7 +18,7 @@ import js.html.Document;
 /**
 
 **/
-class GStats implements IStats
+class GStats implements IGStats
 {
     static public var fps:Int = 0;
     static public var drawCalls:Int = 0;
@@ -63,7 +63,7 @@ class GStats implements IStats
         p_canvas.parentElement.appendChild(g2d_container);
     }
 
-    public function render(p_context:IContext):Void {
+    public function render(p_context:IGContext):Void {
         if (visible) {
             if (g2d_fpsDiv.parentElement == null) {
                 g2d_container.appendChild(g2d_fpsDiv);

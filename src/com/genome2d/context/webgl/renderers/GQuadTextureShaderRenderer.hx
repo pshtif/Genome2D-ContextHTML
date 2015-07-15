@@ -11,6 +11,7 @@ package com.genome2d.context.webgl.renderers;
 import com.genome2d.context.stats.GStats;
 import com.genome2d.context.webgl.renderers.IGRenderer;
 import com.genome2d.debug.GDebug;
+import com.genome2d.textures.GTexture;
 import js.html.Uint16Array;
 import js.html.webgl.Texture;
 import js.html.webgl.Shader;
@@ -18,7 +19,6 @@ import js.html.webgl.Program;
 import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
-import com.genome2d.textures.GContextTexture;
 import js.html.Float32Array;
 
 class GQuadTextureShaderRenderer implements IGRenderer
@@ -293,7 +293,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.vertexAttribPointer(g2d_program.constantIndexAttribute, 4, RenderingContext.FLOAT, false, 0, 0);
     }
 	
-	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GContextTexture):Void {
+	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GTexture):Void {
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
         var useAlpha:Bool = !g2d_useSeparatedAlphaPipeline && !(p_red==1 && p_green==1 && p_blue==1 && p_alpha==1);
         var notSameUseAlpha:Bool = g2d_activeAlpha != useAlpha;
@@ -310,7 +310,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
                 untyped g2d_nativeContext.uniform1i(g2d_program.samplerUniform, 0);
             }
         }
-
+		
         // Alpha is active and textures uses premultiplied source
         if (g2d_activeAlpha) {
             p_red*=p_alpha;
@@ -318,17 +318,16 @@ class GQuadTextureShaderRenderer implements IGRenderer
             p_blue*=p_alpha;
         }
         /**/
-
         var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA<<2;
         g2d_transforms[offset] = p_x;
         g2d_transforms[offset+1] = p_y;
         g2d_transforms[offset+2] = p_rotation;
         g2d_transforms[offset+3] = 0; // Reserved for id
 
-        g2d_transforms[offset+4] = p_texture.uvX;
-        g2d_transforms[offset+5] = p_texture.uvY;
-        g2d_transforms[offset+6] = p_texture.uvScaleX;
-        g2d_transforms[offset+7] = p_texture.uvScaleY;
+        g2d_transforms[offset+4] = p_texture.u;
+        g2d_transforms[offset+5] = p_texture.v;
+        g2d_transforms[offset+6] = p_texture.uScale;
+        g2d_transforms[offset+7] = p_texture.vScale;
 
         g2d_transforms[offset+8] = p_scaleX*p_texture.width;
         g2d_transforms[offset+9] = p_scaleY*p_texture.height;
@@ -348,9 +347,10 @@ class GQuadTextureShaderRenderer implements IGRenderer
 	inline public function push():Void {
         if (g2d_quadCount>0) {
             GStats.drawCalls++;
+
             g2d_nativeContext.uniform4fv(g2d_nativeContext.getUniformLocation(g2d_program, "transforms"), g2d_transforms);
 
-            g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6*g2d_quadCount, RenderingContext.UNSIGNED_SHORT, 0);
+            g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6 * g2d_quadCount, RenderingContext.UNSIGNED_SHORT, 0);
 
             g2d_quadCount = 0;
         }

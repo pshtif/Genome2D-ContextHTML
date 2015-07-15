@@ -10,4 +10,6 @@ package com.genome2d.textures;
 
 class GTextureSourceType {
     inline static public var IMAGE:Int = 0;
+	
+	
 }
