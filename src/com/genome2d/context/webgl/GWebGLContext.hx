@@ -62,6 +62,8 @@ class GWebGLContext implements IGContext implements IGInteractive
 	private var g2d_drawRenderer:GQuadTextureShaderRenderer;
 
     private var g2d_activeRenderer:IGRenderer;
+	private var g2d_activeBlendMode:Int;
+	private var g2d_activePremultiply:Bool;
 
     private var g2d_backgroundRed:Float = 0;
     private var g2d_backgroundGreen:Float = 0;
@@ -176,6 +178,8 @@ class GWebGLContext implements IGContext implements IGInteractive
 	public function begin():Bool {
         g2d_stats.clear();
         g2d_activeRenderer = null;
+		g2d_activePremultiply = true;
+		g2d_activeBlendMode = GBlendMode.NORMAL;
 
         setActiveCamera(g2d_defaultCamera);
         g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
@@ -190,7 +194,8 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 	
 	inline public function draw(p_texture:GTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
-        bindRenderer(g2d_drawRenderer);
+        setBlendMode(p_blendMode, p_texture.premultiplied);
+		bindRenderer(g2d_drawRenderer);
         g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture);
     }
 
@@ -304,6 +309,14 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 	
 	public function setBlendMode(p_blendMode:Int, p_premultiplied:Bool):Void {
-		
+		if (p_blendMode != g2d_activeBlendMode || p_premultiplied != g2d_activePremultiply) {
+            if (g2d_activeRenderer != null) {
+                g2d_activeRenderer.push();
+            }
+
+            g2d_activeBlendMode = p_blendMode;
+            g2d_activePremultiply = p_premultiplied;
+            GBlendMode.setBlendMode(g2d_nativeContext, g2d_activeBlendMode, g2d_activePremultiply);
+        }
 	}
 }
