@@ -14,7 +14,7 @@ import com.genome2d.callbacks.GCallback.GCallback2;
 import com.genome2d.input.IGInteractive;
 import com.genome2d.textures.GTexture;
 import js.html.TouchEvent;
-import com.genome2d.context.webgl.renderers.IGRenderer;
+import com.genome2d.context.IGRenderer;
 import com.genome2d.context.webgl.renderers.GRendererCommon;
 import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
@@ -32,6 +32,7 @@ import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
 import js.html.webgl.RenderingContext;
 
 #if genome_webglonly
+@:native("com.genome2d.context.IGContext")
 class GWebGLContext implements IGInteractive
 #else
 class GWebGLContext implements IGContext implements IGInteractive
@@ -195,7 +196,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 	
 	inline public function draw(p_texture:GTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
         setBlendMode(p_blendMode, p_texture.premultiplied);
-		bindRenderer(g2d_drawRenderer);
+		setRenderer(g2d_drawRenderer);
         g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture);
     }
 
@@ -211,26 +212,30 @@ class GWebGLContext implements IGContext implements IGInteractive
 
     }
 
-    inline public function bindRenderer(p_renderer:Dynamic):Void {
-        if (p_renderer != g2d_activeRenderer || g2d_activeRenderer == null) {
-            if (g2d_activeRenderer != null) {
-                g2d_activeRenderer.push();
-                g2d_activeRenderer.clear();
-            }
+	public function end():Void {
+        flushRenderer();
 
+        g2d_reinitialize = false;
+    }
+
+   inline public function setRenderer(p_renderer:IGRenderer):Void {
+        if(p_renderer != g2d_activeRenderer || g2d_activeRenderer == null) {
+            flushRenderer();
             g2d_activeRenderer = p_renderer;
             g2d_activeRenderer.bind(this, g2d_reinitialize);
         }
     }
-	
-	public function end():Void {
-        if (g2d_activeRenderer != null) {
+
+    inline public function getRenderer():IGRenderer {
+        return g2d_activeRenderer;
+    }
+
+    public function flushRenderer():Void {
+        if(g2d_activeRenderer != null) {
             g2d_activeRenderer.push();
             g2d_activeRenderer.clear();
         }
-
-        g2d_reinitialize = false;
-    }
+     }
 
     public function clearStencil():Void {
 
