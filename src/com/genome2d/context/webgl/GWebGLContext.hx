@@ -48,7 +48,7 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 
     private var g2d_projectionMatrix:Float32Array;
-    private var g2d_reinitialize:Bool = false;
+    private var g2d_reinitialize:Int = 0;
 
     private var g2d_nativeStage:CanvasElement;
     public function getNativeStage():CanvasElement {
@@ -159,7 +159,10 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 	
 	public function resize(p_rect:GRectangle):Void {
+		g2d_stageViewRect = p_rect;
 		
+		g2d_defaultCamera.x = g2d_stageViewRect.width/2;
+        g2d_defaultCamera.y = g2d_stageViewRect.height/2;
 	}
 
     public function setActiveCamera(p_camera:GCamera):Void {
@@ -214,8 +217,6 @@ class GWebGLContext implements IGContext implements IGInteractive
 
 	public function end():Void {
         flushRenderer();
-
-        g2d_reinitialize = false;
     }
 
    inline public function setRenderer(p_renderer:IGRenderer):Void {

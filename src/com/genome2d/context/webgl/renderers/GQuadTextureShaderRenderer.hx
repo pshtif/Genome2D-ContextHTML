@@ -135,12 +135,11 @@ class GQuadTextureShaderRenderer implements IGRenderer
     private var g2d_transforms:Float32Array;
     private var g2d_context:GWebGLContext;
 
-    private var g2d_initialized:Bool;
+    private var g2d_initialized:Int = -1;
 
 	public var g2d_program:Dynamic;
 	
 	public function new():Void {
-        g2d_initialized = false;
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -272,13 +271,14 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_program.constantIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aConstantIndex");
         g2d_nativeContext.enableVertexAttribArray(g2d_program.constantIndexAttribute);
 
-        g2d_transforms = new Float32Array(BATCH_SIZE*TRANSFORM_PER_VERTEX_ALPHA*4);
-        g2d_initialized = true;
+        g2d_transforms = new Float32Array(BATCH_SIZE * TRANSFORM_PER_VERTEX_ALPHA * 4);
 	}
 
     @:access(com.genome2d.context.webgl.GWebGLContext)
-    public function bind(p_context:IGContext, p_reinitialize:Bool):Void {
-        if (!g2d_initialized || p_reinitialize) initialize(cast p_context);
+    public function bind(p_context:IGContext, p_reinitialize:Int):Void {
+        if (p_reinitialize != g2d_initialized) initialize(cast p_context);
+		g2d_initialized = p_reinitialize;
+		
         // Bind camera matrix
         g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix);
 

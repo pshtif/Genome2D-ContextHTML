@@ -27,6 +27,7 @@ class GQuadTextureBufferCPURenderer
     public var vertices(default, null) : Float32Array;
 
     private var g2d_activeNativeTexture:Texture;
+	private var g2d_initialized:Int = 0;
 
 	inline static private var VERTEX_SHADER_CODE:String = 
             "
