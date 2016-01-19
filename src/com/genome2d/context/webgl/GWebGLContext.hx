@@ -150,6 +150,9 @@ class GWebGLContext implements IGContext implements IGInteractive
 		g2d_nativeStage.addEventListener("touchstart", g2d_mouseEventHandler);
 		g2d_nativeStage.addEventListener("touchend", g2d_mouseEventHandler);
 		g2d_nativeStage.addEventListener("touchmove", g2d_mouseEventHandler);
+		
+		g2d_nativeStage.addEventListener("keyup", g2d_keyboardEventHandler);
+		g2d_nativeStage.addEventListener("keydown", g2d_keyboardEventHandler);
 		/**/
 
         g2d_nativeContext.pixelStorei(RenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, RenderingContext.ONE);
@@ -301,6 +304,16 @@ class GWebGLContext implements IGContext implements IGInteractive
         onMouseInput.dispatch(input);
 		g2d_onMouseInputInternal(input);
     }
+	
+	private function g2d_keyboardEventHandler(event:Event):Void {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		var keyEvent:KeyboardEvent = cast event;
+		
+		var input:GKeyboardInput = new GKeyboardInput(GKeyboardInputType.fromNative(event.type), keyEvent.keyCode, keyEvent.charCode);
+        onKeyboardInput.dispatch(input);
+	}
 
     public function dispose():Void {
 		g2d_onMouseInputInternal = null;
