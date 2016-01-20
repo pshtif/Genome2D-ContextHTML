@@ -15,6 +15,7 @@ import js.html.Event;
 import js.html.MouseEvent;
 import js.html.KeyboardEvent;
 import js.html.webgl.RenderingContext;
+import js.Browser;
 
 import com.genome2d.callbacks.GCallback.GCallback0;
 import com.genome2d.callbacks.GCallback.GCallback1;
@@ -154,8 +155,8 @@ class GWebGLContext implements IGContext implements IGInteractive
 		g2d_nativeStage.addEventListener("touchend", g2d_mouseEventHandler);
 		g2d_nativeStage.addEventListener("touchmove", g2d_mouseEventHandler);
 		
-		g2d_nativeStage.addEventListener("keyup", g2d_keyboardEventHandler);
-		g2d_nativeStage.addEventListener("keydown", g2d_keyboardEventHandler);
+		Browser.window.addEventListener("keyup", g2d_keyboardEventHandler);
+		Browser.window.addEventListener("keydown", g2d_keyboardEventHandler);
 		/**/
 
         g2d_nativeContext.pixelStorei(RenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, RenderingContext.ONE);
