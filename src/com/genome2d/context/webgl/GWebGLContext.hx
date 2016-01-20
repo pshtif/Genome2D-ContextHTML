@@ -8,28 +8,31 @@
  */
 package com.genome2d.context.webgl;
 
+import js.html.CanvasElement;
+import js.html.TouchEvent;
+import js.html.Float32Array;
+import js.html.Event;
+import js.html.MouseEvent;
+import js.html.KeyboardEvent;
+import js.html.webgl.RenderingContext;
+
 import com.genome2d.callbacks.GCallback.GCallback0;
 import com.genome2d.callbacks.GCallback.GCallback1;
 import com.genome2d.callbacks.GCallback.GCallback2;
 import com.genome2d.input.IGInteractive;
 import com.genome2d.textures.GTexture;
-import js.html.TouchEvent;
 import com.genome2d.context.IGRenderer;
 import com.genome2d.context.webgl.renderers.GRendererCommon;
-import js.html.Float32Array;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.context.stats.GStats;
-import com.genome2d.input.GMouseInputType;
-import js.html.Event;
-import js.html.MouseEvent;
 import com.genome2d.context.stats.IGStats;
 import com.genome2d.geom.GRectangle;
 import com.genome2d.input.GKeyboardInput;
+import com.genome2d.input.GKeyboardInputType;
 import com.genome2d.input.GMouseInput;
-import js.html.CanvasElement;
+import com.genome2d.input.GMouseInputType;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
-import js.html.webgl.RenderingContext;
 
 #if genome_webglonly
 @:native("com.genome2d.context.IGContext")
@@ -310,7 +313,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 		event.stopPropagation();
 		
 		var keyEvent:KeyboardEvent = cast event;
-		
+
 		var input:GKeyboardInput = new GKeyboardInput(GKeyboardInputType.fromNative(event.type), keyEvent.keyCode, keyEvent.charCode);
         onKeyboardInput.dispatch(input);
 	}
