@@ -77,6 +77,10 @@ class GStats implements IGStats
                 fps = Math.round( ( g2d_frames * 1000 ) / ( time - g2d_previousTime ) );
 
                 g2d_fpsText.textContent = 'FPS: ' + fps +" Drawcalls: " + drawCalls;
+				if (customStats != null) {
+					g2d_fpsText.textContent += " ";
+					for (stat in customStats) g2d_fpsText.textContent += stat;
+				}
                 g2d_previousTime = time;
                 g2d_frames = 0;
             }
