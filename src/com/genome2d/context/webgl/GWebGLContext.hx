@@ -290,24 +290,33 @@ class GWebGLContext implements IGContext implements IGInteractive
         var mx:Float;
         var my:Float;
 		var buttonDown:Bool = false;
+		var ctrlKey:Bool = false;
+		var altKey:Bool = false;
+		var shiftKey:Bool = false;
         if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
             mx = me.pageX - g2d_nativeStage.offsetLeft;
             my = me.pageY - g2d_nativeStage.offsetTop;
 			buttonDown = me.buttons & 1 == 1;
+			ctrlKey = me.ctrlKey;
+			altKey = me.altKey;
+			shiftKey = me.shiftKey;
         } else {
             var te:TouchEvent = cast event;
             mx = te.targetTouches[0].pageX;
             my = te.targetTouches[0].pageY;
+			ctrlKey = te.ctrlKey;
+			altKey = te.altKey;
+			shiftKey = te.shiftKey;
         }
 
         var input:GMouseInput = new GMouseInput(this, this, GMouseInputType.fromNative(event.type), mx, my);
 		input.worldX = input.contextX = mx;
 		input.worldY = input.contextY = my;
         input.buttonDown = buttonDown;
-        input.ctrlKey = false;
-        input.altKey = false;
-        input.shiftKey = false;
+        input.ctrlKey = ctrlKey;
+        input.altKey = altKey;
+        input.shiftKey = shiftKey;
         input.delta = 0;
 		input.nativeCaptured = captured;
 		
