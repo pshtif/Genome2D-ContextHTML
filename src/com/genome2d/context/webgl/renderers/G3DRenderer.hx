@@ -53,7 +53,7 @@ class G3DRenderer implements IGRenderer
 			void main(void)
 			{
 				vUv = aUv;
-				gl_Position =  vec4(aPosition.x, aPosition.y, 0, 1);
+				gl_Position =  vec4(aPosition.x, aPosition.y, aPosition.z, 1);
 				gl_Position = gl_Position * projectionMatrix;
 			}
 		";
@@ -81,7 +81,14 @@ class G3DRenderer implements IGRenderer
 	inline public static var STRIDE : Int = 24;
 	
 	public function new(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>):Void {
+		g2d_vertices = new Float32Array(p_vertices.length);
+		for (i in 0...p_vertices.length) g2d_vertices[i] = p_vertices[i];
 		
+		g2d_uvs = new Float32Array(p_uvs.length);
+		for (i in 0...p_uvs.length) g2d_uvs[i] = p_uvs[i];
+		
+		g2d_indices = new Uint16Array(p_indices.length);
+		for (i in 0...p_indices.length) g2d_indices[i] = p_indices[i];
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -129,7 +136,6 @@ class G3DRenderer implements IGRenderer
     public function bind(p_context:IGContext, p_reinitialize:Int):Void {
 		if (p_reinitialize != g2d_initialized) initialize(cast p_context);
 		g2d_initialized = p_reinitialize;
-		trace(g2d_initialized, p_reinitialize);
         // Bind camera matrix
         g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix);
     }
@@ -155,7 +161,8 @@ class G3DRenderer implements IGRenderer
         //var numItems:Int = Std.int((g2d_quadCount * STRIDE) / 4);
 		
 
-        g2d_nativeContext.drawArrays(RenderingContext.TRIANGLES, 0, 2);
+        //g2d_nativeContext.drawArrays(RenderingContext.TRIANGLES, 0, 4);
+		g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6, RenderingContext.UNSIGNED_SHORT, 0);
     }
 	
 	public function push():Void {
