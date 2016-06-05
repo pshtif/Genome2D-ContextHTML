@@ -6,7 +6,7 @@
  *
  *	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
  */
-package com.genome2d.context.webgl.renderers;
+package com.genome2d.context.renderers;
 
 import com.genome2d.debug.GDebug;
 import js.html.webgl.Texture;

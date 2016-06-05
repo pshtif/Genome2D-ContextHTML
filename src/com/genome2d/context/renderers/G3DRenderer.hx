@@ -6,11 +6,13 @@
  *
  *	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
  */
-package com.genome2d.context.webgl.renderers;
+package com.genome2d.context.renderers;
 
+import com.genome2d.context.GProjectionMatrix;
 import com.genome2d.context.IGContext;
-import com.genome2d.context.webgl.GWebGLContext;
+import com.genome2d.context.GWebGLContext;
 import com.genome2d.debug.GDebug;
+import com.genome2d.geom.GMatrix3D;
 import com.genome2d.textures.GTexture;
 import js.html.webgl.Texture;
 import js.html.webgl.Shader;
@@ -23,6 +25,10 @@ import js.html.Uint16Array;
 
 class G3DRenderer implements IGRenderer
 {
+	public var modelMatrix:GMatrix3D;
+	public var cameraMatrix:GMatrix3D;
+	public var projectionMatrix:GProjectionMatrix;
+	
 	private var g2d_context:GWebGLContext;
     private var g2d_nativeContext:RenderingContext;
 	private var g2d_quadCount:Int = 0;
@@ -54,6 +60,7 @@ class G3DRenderer implements IGRenderer
 			{
 				vUv = aUv;
 				gl_Position =  vec4(aPosition.x, aPosition.y, aPosition.z, 1);
+				gl_Position = gl_Position * modelMatrix;
 				gl_Position = gl_Position * projectionMatrix;
 			}
 		";
@@ -80,7 +87,7 @@ class G3DRenderer implements IGRenderer
 	
 	inline public static var STRIDE : Int = 24;
 	
-	public function new(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>):Void {
+	public function new(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>, p_normals:Array<Float>, p_generatePerspectiveMatrix:Bool = false):Void {
 		g2d_vertices = new Float32Array(p_vertices.length);
 		for (i in 0...p_vertices.length) g2d_vertices[i] = p_vertices[i];
 		
@@ -89,6 +96,8 @@ class G3DRenderer implements IGRenderer
 		
 		g2d_indices = new Uint16Array(p_indices.length);
 		for (i in 0...p_indices.length) g2d_indices[i] = p_indices[i];
+		
+		modelMatrix = new GMatrix3D();
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -132,15 +141,23 @@ class G3DRenderer implements IGRenderer
 		g2d_uvBuffer = g2d_nativeContext.createBuffer();
 	}
 
-	@:access(com.genome2d.context.webgl.GWebGLContext)
+	@:access(com.genome2d.context.GWebGLContext)
     public function bind(p_context:IGContext, p_reinitialize:Int):Void {
 		if (p_reinitialize != g2d_initialized) initialize(cast p_context);
 		g2d_initialized = p_reinitialize;
+		
+		g2d_nativeContext.useProgram(g2d_program);
         // Bind camera matrix
-        g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix);
+		if (projectionMatrix != null) {
+			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  projectionMatrix.rawData);
+		} else {
+			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
+		}
+		
+		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  modelMatrix.rawData);
     }
 	
-	public function draw():Void {
+	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
 
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
@@ -158,11 +175,7 @@ class G3DRenderer implements IGRenderer
 		g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indices, RenderingContext.STATIC_DRAW);
 
-        //var numItems:Int = Std.int((g2d_quadCount * STRIDE) / 4);
-		
-
-        //g2d_nativeContext.drawArrays(RenderingContext.TRIANGLES, 0, 4);
-		g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6, RenderingContext.UNSIGNED_SHORT, 0);
+		g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, g2d_indices.length, RenderingContext.UNSIGNED_SHORT, 0);
     }
 	
 	public function push():Void {

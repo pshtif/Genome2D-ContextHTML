@@ -11,7 +11,7 @@ package com.genome2d.context;
 import com.genome2d.geom.GRectangle;
 import com.genome2d.debug.GDebug;
 import com.genome2d.context.stats.IGStats;
-import com.genome2d.context.webgl.GWebGLContext;
+import com.genome2d.context.GWebGLContext;
 import com.genome2d.geom.GRectangle;
 import js.Browser;
 import js.html.CanvasElement;
@@ -28,6 +28,10 @@ class GContextConfig
 	public var contextClass:Class<IGContext>;
     public var fallbackContextClass:Class<IGContext>;
     public var statsClass:Class<IGStats>;
+	
+	public var enableDepthAndStencil:Bool = false;
+	public var enableErrorChecking:Bool = false;
+	public var antiAliasing:Int = 0;
 	
     public function new(?p_viewRect:GRectangle = null) {
 		nativeStage = cast Browser.document.getElementById("canvas");

@@ -6,7 +6,7 @@
  *
  *	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
  */
-package com.genome2d.context.webgl;
+package com.genome2d.context;
 
 import js.html.CanvasElement;
 import js.html.TouchEvent;
@@ -23,7 +23,7 @@ import com.genome2d.callbacks.GCallback.GCallback2;
 import com.genome2d.input.IGInteractive;
 import com.genome2d.textures.GTexture;
 import com.genome2d.context.IGRenderer;
-import com.genome2d.context.webgl.renderers.GRendererCommon;
+import com.genome2d.context.renderers.GRendererCommon;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.context.stats.GStats;
 import com.genome2d.context.stats.IGStats;
@@ -33,7 +33,7 @@ import com.genome2d.input.GKeyboardInputType;
 import com.genome2d.input.GMouseInput;
 import com.genome2d.input.GMouseInputType;
 import com.genome2d.context.filters.GFilter;
-import com.genome2d.context.webgl.renderers.GQuadTextureShaderRenderer;
+import com.genome2d.context.renderers.GQuadTextureShaderRenderer;
 
 #if genome_webglonly
 @:native("com.genome2d.context.IGContext")
@@ -51,7 +51,7 @@ class GWebGLContext implements IGContext implements IGInteractive
         return false;
     }
 
-    private var g2d_projectionMatrix:Float32Array;
+    private var g2d_projectionMatrix:GProjectionMatrix;
     private var g2d_reinitialize:Int = 0;
 
     private var g2d_nativeStage:CanvasElement;
@@ -177,10 +177,9 @@ class GWebGLContext implements IGContext implements IGInteractive
 	}
 
     public function setActiveCamera(p_camera:GCamera):Void {
-        g2d_projectionMatrix = new Float32Array([2.0/g2d_stageViewRect.width, 0.0, 0.0, -1.0,
-                                                0.0, -2.0/g2d_stageViewRect.height, 0.0, 1.0,
-                                                0.0, 0.0, 1.0, 0.0,
-                                                0.0, 0.0, 0.0, 1.0]);
+        g2d_projectionMatrix = new GProjectionMatrix();
+		g2d_projectionMatrix.ortho(g2d_stageViewRect.width, g2d_stageViewRect.height);
+		g2d_projectionMatrix.transpose();
     }
 
     public function getMaskRect():GRectangle {
@@ -201,7 +200,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 
 		g2d_nativeContext.clearColor(g2d_backgroundRed, g2d_backgroundGreen, g2d_backgroundBlue, g2d_backgroundAlpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
-        g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
+        g2d_nativeContext.enable(RenderingContext.DEPTH_TEST);
         g2d_nativeContext.enable(RenderingContext.BLEND);
         GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		

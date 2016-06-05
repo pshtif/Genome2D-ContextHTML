@@ -12,7 +12,7 @@ import com.genome2d.debug.GDebug;
 import com.genome2d.context.IGContext;
 import com.genome2d.geom.GRectangle;
 import com.genome2d.context.GContextFeature;
-import com.genome2d.context.webgl.GWebGLContext;
+import com.genome2d.context.GWebGLContext;
 import com.genome2d.textures.GTextureSourceType;
 
 import js.html.Image;

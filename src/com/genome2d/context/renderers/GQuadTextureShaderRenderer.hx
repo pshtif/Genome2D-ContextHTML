@@ -6,8 +6,9 @@
  *
  *	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
  */
-package com.genome2d.context.webgl.renderers;
+package com.genome2d.context.renderers;
 
+import com.genome2d.context.GWebGLContext;
 import com.genome2d.context.stats.GStats;
 import com.genome2d.context.IGRenderer;
 import com.genome2d.context.IGContext;
@@ -169,8 +170,6 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
 		//if (!RenderingContext.getProgramParameter(program, RenderingContext.LINK_STATUS)) { trace("Could not initialise shaders"); }
 
-		g2d_nativeContext.useProgram(g2d_program);
-
         var vertices:Float32Array = new Float32Array(8*BATCH_SIZE);
         var uvs:Float32Array = new Float32Array(8*BATCH_SIZE);
         var registerIndices:Float32Array = new Float32Array(TRANSFORM_PER_VERTEX*BATCH_SIZE*4);
@@ -274,13 +273,15 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_transforms = new Float32Array(BATCH_SIZE * TRANSFORM_PER_VERTEX_ALPHA * 4);
 	}
 
-    @:access(com.genome2d.context.webgl.GWebGLContext)
+    @:access(com.genome2d.context.GWebGLContext)
     public function bind(p_context:IGContext, p_reinitialize:Int):Void {
         if (p_reinitialize != g2d_initialized) initialize(cast p_context);
 		g2d_initialized = p_reinitialize;
 		
+		g2d_nativeContext.useProgram(g2d_program);
+		
         // Bind camera matrix
-        g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix);
+        g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
 
