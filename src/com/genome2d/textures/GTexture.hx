@@ -57,6 +57,7 @@ class GTexture extends GTextureBase
     public function invalidateNativeTexture(p_reinitialize:Bool):Void {
 		if (Std.is(g2d_context, GWebGLContext)) {
 			var webglContext:GWebGLContext = cast g2d_context;
+			var nativeContext:RenderingContext = webglContext.getNativeContext();
 			if (g2d_sourceType != GTextureSourceType.TEXTURE) {
 				g2d_gpuWidth = usesRectangle() ? g2d_nativeWidth : GTextureUtils.getNextValidTextureSize(g2d_nativeWidth);
                 g2d_gpuHeight = usesRectangle() ? g2d_nativeHeight : GTextureUtils.getNextValidTextureSize(g2d_nativeHeight);
@@ -64,17 +65,37 @@ class GTexture extends GTextureBase
 				switch (g2d_sourceType) {
 					case GTextureSourceType.IMAGE:
 						if (nativeTexture == null || p_reinitialize) {
-							g2d_nativeTexture = webglContext.getNativeContext().createTexture();
+							g2d_nativeTexture = nativeContext.createTexture();
 						}
 
-						webglContext.getNativeContext().bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
-                        webglContext.getNativeContext().texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, cast g2d_source);
-						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
-						webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
-                        webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_S, RenderingContext.CLAMP_TO_EDGE);
-                        webglContext.getNativeContext().texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_T, RenderingContext.CLAMP_TO_EDGE);
+						nativeContext.bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
+                        nativeContext.texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, cast g2d_source);
+						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
+						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
+                        nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_S, RenderingContext.CLAMP_TO_EDGE);
+                        nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_T, RenderingContext.CLAMP_TO_EDGE);
 
-                        webglContext.getNativeContext().bindTexture(RenderingContext.TEXTURE_2D, null);
+                        nativeContext.bindTexture(RenderingContext.TEXTURE_2D, null);
+					case GTextureSourceType.RENDER_TARGET:
+						if (nativeTexture == null || p_reinitialize) {
+							g2d_nativeTexture = nativeContext.createTexture();
+						}
+						
+						nativeContext.bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
+                        nativeContext.texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, 16, 16, 0, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, null);
+						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
+						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
+                        nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_S, RenderingContext.CLAMP_TO_EDGE);
+                        nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_T, RenderingContext.CLAMP_TO_EDGE);
+						
+						var fb = nativeContext.createFramebuffer();
+						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, fb);
+						nativeContext.framebufferTexture2D(RenderingContext.FRAMEBUFFER, RenderingContext.COLOR_ATTACHMENT0, RenderingContext.TEXTURE_2D, g2d_nativeTexture, 0);
+						
+						nativeContext.clearColor(0, 1, 0, 1);
+						nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT);
+						// TODO: should be handled in main pipeline
+						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, null);
 					default:
 				}
 			}
