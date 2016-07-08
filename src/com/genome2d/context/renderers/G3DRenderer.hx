@@ -12,6 +12,7 @@ import com.genome2d.context.GProjectionMatrix;
 import com.genome2d.context.IGContext;
 import com.genome2d.context.GWebGLContext;
 import com.genome2d.debug.GDebug;
+import com.genome2d.geom.GFloat4;
 import com.genome2d.geom.GMatrix3D;
 import com.genome2d.textures.GTexture;
 import js.html.webgl.Texture;
@@ -43,6 +44,11 @@ class G3DRenderer implements IGRenderer
 
     private var g2d_activeNativeTexture:Texture;
 	private var g2d_initialized:Int = -1;
+	
+	public var lightDirection:GFloat4;
+    public var ambientColor:GFloat4;
+    public var tintColor:GFloat4;
+    public var lightColor:GFloat4;
 	
 	public var texture:GTexture;
 
@@ -154,7 +160,10 @@ class G3DRenderer implements IGRenderer
 			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
 		}
 		
-		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  modelMatrix.rawData);
+		// TODO probably not a good solution but WebGL doesn't support transpose parameter for uniformMatrix4fv due to ES2 limitations, possible solutions can also conflict with feature parity
+		var transposedMatrix:GMatrix3D = modelMatrix.clone();
+		transposedMatrix.transpose();
+		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  transposedMatrix.rawData);
     }
 	
 	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
