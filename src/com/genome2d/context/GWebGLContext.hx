@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import com.genome2d.macros.MGDebug;
 import js.html.CanvasElement;
 import js.html.TouchEvent;
 import js.html.Float32Array;
@@ -260,6 +261,10 @@ class GWebGLContext implements IGContext implements IGInteractive
 
     }
 	
+	private var g2d_renderTarget:GTexture;
+	private var g2d_renderTargetMatrix:GMatrix3D;
+	private var g2d_usedRenderTargets:Int = 0;
+	
 	public function getRenderTargetMatrix():GMatrix3D {
 		return null;
 	}
@@ -268,8 +273,37 @@ class GWebGLContext implements IGContext implements IGInteractive
 		return null;
 	}
 
-    public function setRenderTarget(p_texture:GTexture = null, p_transform:GMatrix3D = null, p_clear:Bool = false):Void {
+    public function setRenderTarget(p_texture:GTexture = null, p_transform:GMatrix3D = null, p_clear:Bool = true):Void {
+		// Check if we aren't setting it to the same texture while not using MRT
+		if (g2d_renderTarget == p_texture && g2d_usedRenderTargets == 0) return;
+		
+		// If there is any active renderer we will push it to the current target
+		if (g2d_activeRenderer != null) g2d_activeRenderer.push();
+		
+		// Doesn't support MRT yet but we will reset it anyway
+		g2d_usedRenderTargets = 0;
+		
+		// If the target is null its a backbuffer
+		if (p_texture == null) {
+			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, null);
 
+            // Reset camera
+            setActiveCamera(g2d_activeCamera);
+        // Otherwise its a render texture
+		} else {
+			if (p_texture.nativeTexture == null) MGDebug.WARNING("Null render texture, will incorrectly render to backbuffer instead.");
+			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, p_texture.getFrameBuffer());
+            //g2d_nativeContext.setScissorRectangle(null);
+            if (p_texture.needClearAsRenderTarget(p_clear)) {
+				g2d_nativeContext.clearColor(0, 1, 0, 1);
+				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT);
+			}
+
+			//g2d_nativeContext.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, GProjectionMatrix.getOrtho(p_texture.nativeWidth, p_texture.nativeHeight, p_transform), true);
+		}
+
+        g2d_renderTargetMatrix = p_transform;
+		g2d_renderTarget = p_texture;
     }
 
     private function g2d_enterFrameHandler():Void {

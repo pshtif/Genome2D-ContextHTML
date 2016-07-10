@@ -16,12 +16,18 @@ import com.genome2d.context.GWebGLContext;
 import com.genome2d.textures.GTextureSourceType;
 
 import js.html.Image;
+import js.html.webgl.Framebuffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.Texture;
 import js.html.ImageElement;
 
 class GTexture extends GTextureBase
 {
+	private var g2d_frameBuffer:Framebuffer;
+	public function getFrameBuffer():Framebuffer {
+		return g2d_frameBuffer;
+	}
+	
 	override public function setSource(p_value:Dynamic):Dynamic {
         if (g2d_source != p_value) {
             g2d_dirty = true;
@@ -82,18 +88,16 @@ class GTexture extends GTextureBase
 						}
 						
 						nativeContext.bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
-                        nativeContext.texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, 16, 16, 0, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, null);
+                        nativeContext.texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, g2d_gpuWidth, g2d_gpuHeight, 0, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, null);
 						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
 						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
                         nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_S, RenderingContext.CLAMP_TO_EDGE);
                         nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_WRAP_T, RenderingContext.CLAMP_TO_EDGE);
 						
-						var fb = nativeContext.createFramebuffer();
-						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, fb);
+						g2d_frameBuffer = nativeContext.createFramebuffer();
+						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, g2d_frameBuffer);
 						nativeContext.framebufferTexture2D(RenderingContext.FRAMEBUFFER, RenderingContext.COLOR_ATTACHMENT0, RenderingContext.TEXTURE_2D, g2d_nativeTexture, 0);
-						
-						nativeContext.clearColor(0, 1, 0, 1);
-						nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT);
+		
 						// TODO: should be handled in main pipeline
 						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, null);
 					default:
