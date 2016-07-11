@@ -273,7 +273,6 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_transforms = new Float32Array(BATCH_SIZE * TRANSFORM_PER_VERTEX_ALPHA * 4);
 	}
 
-    @:access(com.genome2d.context.GWebGLContext)
     public function bind(p_context:IGContext, p_reinitialize:Int):Void {
         if (p_reinitialize != g2d_initialized) initialize(cast p_context);
 		g2d_initialized = p_reinitialize;
@@ -281,8 +280,6 @@ class GQuadTextureShaderRenderer implements IGRenderer
 		g2d_nativeContext.useProgram(g2d_program);
 		
         // Bind camera matrix
-        g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
-
         g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_geometryBuffer);
@@ -346,10 +343,13 @@ class GQuadTextureShaderRenderer implements IGRenderer
         if (g2d_quadCount == BATCH_SIZE) push();
 	}
 	
+	@:access(com.genome2d.context.GWebGLContext)
 	inline public function push():Void {
         if (g2d_quadCount>0) {
             GStats.drawCalls++;
 
+			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
+			
             g2d_nativeContext.uniform4fv(g2d_nativeContext.getUniformLocation(g2d_program, "transforms"), g2d_transforms);
 
             g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6 * g2d_quadCount, RenderingContext.UNSIGNED_SHORT, 0);

@@ -201,7 +201,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 
 		g2d_nativeContext.clearColor(g2d_backgroundRed, g2d_backgroundGreen, g2d_backgroundBlue, g2d_backgroundAlpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
-        g2d_nativeContext.enable(RenderingContext.DEPTH_TEST);
+        g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
         g2d_nativeContext.enable(RenderingContext.BLEND);
         GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		
@@ -286,24 +286,36 @@ class GWebGLContext implements IGContext implements IGInteractive
 		// If the target is null its a backbuffer
 		if (p_texture == null) {
 			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, null);
+			g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
 
             // Reset camera
             setActiveCamera(g2d_activeCamera);
         // Otherwise its a render texture
 		} else {
-			if (p_texture.nativeTexture == null) MGDebug.WARNING("Null render texture, will incorrectly render to backbuffer instead.");
+			if (p_texture.nativeTexture == null) MGDebug.G2D_WARNING("Null render texture, will incorrectly render to backbuffer instead.");
 			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, p_texture.getFrameBuffer());
+			g2d_nativeContext.viewport(0, 0, Std.int(p_texture.nativeWidth), Std.int(p_texture.nativeHeight));
+			
             //g2d_nativeContext.setScissorRectangle(null);
             if (p_texture.needClearAsRenderTarget(p_clear)) {
 				g2d_nativeContext.clearColor(0, 1, 0, 1);
 				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT);
 			}
+			
+			if (p_transform != null) MGDebug.G2D_WARNING("setRenderTarget p_transform argument is not supported for this target.");
+			g2d_projectionMatrix = new GProjectionMatrix();
+			g2d_projectionMatrix.orthoRtt(p_texture.nativeWidth, p_texture.nativeHeight);
+			g2d_projectionMatrix.transpose();
 
 			//g2d_nativeContext.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, GProjectionMatrix.getOrtho(p_texture.nativeWidth, p_texture.nativeHeight, p_transform), true);
 		}
 
         g2d_renderTargetMatrix = p_transform;
 		g2d_renderTarget = p_texture;
+    }
+	
+	public function setRenderTargets(p_textures:Array<GTexture>, p_transform:GMatrix3D = null, p_clear:Bool = false):Void {
+
     }
 
     private function g2d_enterFrameHandler():Void {
@@ -372,10 +384,6 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 
     public function setDepthTest(p_depthMask:Bool, p_compareMode:Dynamic):Void {
-
-    }
-
-    public function setRenderTargets(p_textures:Array<GTexture>, p_transform:GMatrix3D = null, p_clear:Bool = false):Void {
 
     }
 	
