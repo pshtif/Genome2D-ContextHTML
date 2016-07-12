@@ -348,7 +348,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         if (g2d_quadCount>0) {
             GStats.drawCalls++;
 			
-			g2d_context.setDepthTest(false, null);
+			//g2d_context.setDepthTest(false, null);
 
 			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
 			

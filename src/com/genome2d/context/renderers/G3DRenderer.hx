@@ -167,9 +167,8 @@ class G3DRenderer implements IGRenderer
 		var transposedMatrix:GMatrix3D = modelMatrix.clone();
 		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  transposedMatrix.rawData);
-		
-		
-		g2d_context.setDepthTest(true, null);
+			
+		//g2d_context.setDepthTest(true, null);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);

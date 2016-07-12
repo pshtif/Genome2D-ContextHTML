@@ -299,7 +299,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 			
             //g2d_nativeContext.setScissorRectangle(null);
             if (p_texture.needClearAsRenderTarget(p_clear)) {
-				g2d_nativeContext.clearColor(0.2, 0.2, 0.2, 1);
+				g2d_nativeContext.clearColor(0, 0, 0, 0);
 				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
 			}
 			
