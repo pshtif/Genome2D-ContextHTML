@@ -54,6 +54,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 
     private var g2d_projectionMatrix:GProjectionMatrix;
     private var g2d_reinitialize:Int = 0;
+	private var g2d_depthTestEnabled:Bool = false;
 
     private var g2d_nativeStage:CanvasElement;
     public function getNativeStage():CanvasElement {
@@ -201,7 +202,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 
 		g2d_nativeContext.clearColor(g2d_backgroundRed, g2d_backgroundGreen, g2d_backgroundBlue, g2d_backgroundAlpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
-        g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
+		setDepthTest(false, null);
         g2d_nativeContext.enable(RenderingContext.BLEND);
         GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		
@@ -298,8 +299,8 @@ class GWebGLContext implements IGContext implements IGInteractive
 			
             //g2d_nativeContext.setScissorRectangle(null);
             if (p_texture.needClearAsRenderTarget(p_clear)) {
-				g2d_nativeContext.clearColor(0, 1, 0, 1);
-				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT);
+				g2d_nativeContext.clearColor(0.2, 0.2, 0.2, 1);
+				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
 			}
 			
 			if (p_transform != null) MGDebug.G2D_WARNING("setRenderTarget p_transform argument is not supported for this target.");
@@ -384,7 +385,15 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 
     public function setDepthTest(p_depthMask:Bool, p_compareMode:Dynamic):Void {
-
+		if (p_depthMask != g2d_depthTestEnabled) {
+			if (p_depthMask) {
+				g2d_nativeContext.enable(RenderingContext.DEPTH_TEST);
+				g2d_nativeContext.depthFunc(RenderingContext.LESS);
+			} else {
+				g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
+			}
+			g2d_depthTestEnabled = p_depthMask;
+		}
     }
 	
 	public function setBlendMode(p_blendMode:Int, p_premultiplied:Bool):Void {

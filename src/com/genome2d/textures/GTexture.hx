@@ -97,9 +97,15 @@ class GTexture extends GTextureBase
 						g2d_frameBuffer = nativeContext.createFramebuffer();
 						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, g2d_frameBuffer);
 						nativeContext.framebufferTexture2D(RenderingContext.FRAMEBUFFER, RenderingContext.COLOR_ATTACHMENT0, RenderingContext.TEXTURE_2D, g2d_nativeTexture, 0);
-		
-						// TODO: should be handled in main pipeline
+						
+						var renderbuffer = nativeContext.createRenderbuffer();
+						nativeContext.bindRenderbuffer(RenderingContext.RENDERBUFFER, renderbuffer);
+						nativeContext.renderbufferStorage(RenderingContext.RENDERBUFFER, RenderingContext.DEPTH_COMPONENT16, g2d_gpuWidth, g2d_gpuHeight);
+						nativeContext.framebufferRenderbuffer(RenderingContext.FRAMEBUFFER, RenderingContext.DEPTH_ATTACHMENT, RenderingContext.RENDERBUFFER, renderbuffer);
+
+						nativeContext.bindTexture(RenderingContext.TEXTURE_2D, null);
 						nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, null);
+						nativeContext.bindRenderbuffer(RenderingContext.RENDERBUFFER, null);
 					default:
 				}
 			}

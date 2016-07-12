@@ -153,7 +153,10 @@ class G3DRenderer implements IGRenderer
 		g2d_initialized = p_reinitialize;
 		
 		g2d_nativeContext.useProgram(g2d_program);
-        // Bind camera matrix
+    }
+	
+	@:access(com.genome2d.context.GWebGLContext)
+	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
 		if (projectionMatrix != null) {
 			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  projectionMatrix.rawData);
 		} else {
@@ -164,10 +167,10 @@ class G3DRenderer implements IGRenderer
 		var transposedMatrix:GMatrix3D = modelMatrix.clone();
 		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  transposedMatrix.rawData);
-    }
-	
-	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
-
+		
+		
+		g2d_context.setDepthTest(true, null);
+		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
 		g2d_nativeContext.bindTexture(RenderingContext.TEXTURE_2D, texture.nativeTexture);
