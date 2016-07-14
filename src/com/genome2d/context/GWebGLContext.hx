@@ -72,6 +72,7 @@ class GWebGLContext implements IGContext implements IGInteractive
     private var g2d_activeRenderer:IGRenderer;
 	private var g2d_activeBlendMode:Int;
 	private var g2d_activePremultiply:Bool;
+	private var g2d_activeMaskRect:GRectangle;
 
     private var g2d_backgroundRed:Float = 0;
     private var g2d_backgroundGreen:Float = 0;
@@ -180,16 +181,33 @@ class GWebGLContext implements IGContext implements IGInteractive
 	}
 
     public function setActiveCamera(p_camera:GCamera):Void {
+		g2d_activeCamera = p_camera;
+		
+		g2d_activeViewRect.setTo(Std.int(g2d_stageViewRect.width*g2d_activeCamera.normalizedViewX),
+                                 Std.int(g2d_stageViewRect.height*g2d_activeCamera.normalizedViewY),
+                                 Std.int(g2d_stageViewRect.width*g2d_activeCamera.normalizedViewWidth),
+                                 Std.int(g2d_stageViewRect.height*g2d_activeCamera.normalizedViewHeight));
+		
         g2d_projectionMatrix = new GProjectionMatrix();
 		g2d_projectionMatrix.ortho(g2d_stageViewRect.width, g2d_stageViewRect.height);
 		g2d_projectionMatrix.transpose();
     }
 
-    public function getMaskRect():GRectangle {
-        return null;
+    inline public function getMaskRect():GRectangle {
+        return g2d_activeMaskRect;
     }
-    public function setMaskRect(p_maskRect:GRectangle):Void {
+    inline public function setMaskRect(p_maskRect:GRectangle):Void {
+        if (p_maskRect != g2d_activeMaskRect) {
+            if (g2d_activeRenderer != null) g2d_activeRenderer.push();
 
+            if (p_maskRect == null) {
+                g2d_nativeContext.disable(RenderingContext.SCISSOR_TEST);
+            } else {
+				g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
+                g2d_activeMaskRect = g2d_activeViewRect.intersection(p_maskRect);
+                g2d_nativeContext.scissor(Std.int(g2d_activeMaskRect.x), Std.int(g2d_activeMaskRect.y), Std.int(g2d_activeMaskRect.width), Std.int(g2d_activeMaskRect.height));
+            }
+        }
     }
 	
 	public function begin():Bool {
