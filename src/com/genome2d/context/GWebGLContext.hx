@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import com.genome2d.context.GDepthFunc;
 import com.genome2d.macros.MGDebug;
 import js.html.CanvasElement;
 import js.html.TouchEvent;
@@ -384,11 +385,29 @@ class GWebGLContext implements IGContext implements IGInteractive
 		g2d_onMouseInputInternal = null;
     }
 
-    public function setDepthTest(p_depthMask:Bool, p_compareMode:Dynamic):Void {
+    public function setDepthTest(p_depthMask:Bool, p_depthFunc:GDepthFunc):Void {
 		if (p_depthMask != g2d_depthTestEnabled) {
 			if (p_depthMask) {
 				g2d_nativeContext.enable(RenderingContext.DEPTH_TEST);
-				g2d_nativeContext.depthFunc(RenderingContext.LESS);
+				switch (p_depthFunc) {
+					case GDepthFunc.EQUAL:
+						g2d_nativeContext.depthFunc(RenderingContext.EQUAL);
+					case GDepthFunc.GEQUAL:
+						g2d_nativeContext.depthFunc(RenderingContext.GEQUAL);
+					case GDepthFunc.GREATER:
+						g2d_nativeContext.depthFunc(RenderingContext.GREATER);
+					case GDepthFunc.LEQUAL:
+						g2d_nativeContext.depthFunc(RenderingContext.LEQUAL);
+					case GDepthFunc.LESS:
+						g2d_nativeContext.depthFunc(RenderingContext.LESS);
+					case GDepthFunc.NEVER:
+						g2d_nativeContext.depthFunc(RenderingContext.NEVER);
+					case GDepthFunc.NOTEQUAL:
+						g2d_nativeContext.depthFunc(RenderingContext.NOTEQUAL);
+					default:
+						g2d_nativeContext.depthFunc(RenderingContext.ALWAYS);
+						
+				}
 			} else {
 				g2d_nativeContext.disable(RenderingContext.DEPTH_TEST);
 			}
