@@ -157,6 +157,10 @@ class G3DRenderer implements IGRenderer
 	
 	@:access(com.genome2d.context.GWebGLContext)
 	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
+		if (p_cull == 2) g2d_nativeContext.cullFace(RenderingContext.FRONT);
+        else if (p_cull == 1) g2d_nativeContext.cullFace(RenderingContext.BACK);
+        //else g2d_nativeContext.cullFace(RenderingContext.);
+		
 		if (projectionMatrix != null) {
 			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  projectionMatrix.rawData);
 		} else {
@@ -167,8 +171,6 @@ class G3DRenderer implements IGRenderer
 		var transposedMatrix:GMatrix3D = modelMatrix.clone();
 		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  transposedMatrix.rawData);
-			
-		//g2d_context.setDepthTest(true, null);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);

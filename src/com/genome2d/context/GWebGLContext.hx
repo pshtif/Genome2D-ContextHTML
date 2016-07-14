@@ -203,8 +203,10 @@ class GWebGLContext implements IGContext implements IGInteractive
 
 		g2d_nativeContext.clearColor(g2d_backgroundRed, g2d_backgroundGreen, g2d_backgroundBlue, g2d_backgroundAlpha);
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
-		setDepthTest(false, null);
+		setDepthTest(false, GDepthFunc.ALWAYS);
         g2d_nativeContext.enable(RenderingContext.BLEND);
+		g2d_nativeContext.enable(RenderingContext.CULL_FACE);
+		g2d_nativeContext.cullFace(RenderingContext.BACK);
         GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		
 		return true;
@@ -404,7 +406,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 						g2d_nativeContext.depthFunc(RenderingContext.NEVER);
 					case GDepthFunc.NOTEQUAL:
 						g2d_nativeContext.depthFunc(RenderingContext.NOTEQUAL);
-					default:
+					case GDepthFunc.ALWAYS:
 						g2d_nativeContext.depthFunc(RenderingContext.ALWAYS);
 						
 				}
