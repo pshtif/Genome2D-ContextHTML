@@ -205,7 +205,7 @@ class GWebGLContext implements IGContext implements IGInteractive
             } else {
 				g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
                 g2d_activeMaskRect = g2d_activeViewRect.intersection(p_maskRect);
-                g2d_nativeContext.scissor(Std.int(g2d_activeMaskRect.x), Std.int(g2d_activeMaskRect.y), Std.int(g2d_activeMaskRect.width), Std.int(g2d_activeMaskRect.height));
+                g2d_nativeContext.scissor(Std.int(g2d_activeMaskRect.x), Std.int(g2d_activeViewRect.height-g2d_activeMaskRect.y-g2d_activeMaskRect.height), Std.int(g2d_activeMaskRect.width), Std.int(g2d_activeMaskRect.height));
             }
         }
     }
