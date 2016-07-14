@@ -9,6 +9,7 @@
 package com.genome2d.context;
 
 import com.genome2d.context.GDepthFunc;
+import com.genome2d.geom.GVector3D;
 import com.genome2d.macros.MGDebug;
 import js.html.CanvasElement;
 import js.html.TouchEvent;
@@ -181,6 +182,8 @@ class GWebGLContext implements IGContext implements IGInteractive
 	}
 
     public function setActiveCamera(p_camera:GCamera):Void {
+		if (g2d_activeRenderer != null) g2d_activeRenderer.push();
+		
 		g2d_activeCamera = p_camera;
 		
 		g2d_activeViewRect.setTo(Std.int(g2d_stageViewRect.width*g2d_activeCamera.normalizedViewX),
@@ -188,9 +191,19 @@ class GWebGLContext implements IGContext implements IGInteractive
                                  Std.int(g2d_stageViewRect.width*g2d_activeCamera.normalizedViewWidth),
                                  Std.int(g2d_stageViewRect.height*g2d_activeCamera.normalizedViewHeight));
 		
+		var vx:Float = g2d_activeViewRect.x + g2d_activeViewRect.width*.5;
+        var vy:Float = g2d_activeViewRect.y + g2d_activeViewRect.height * .5;
+								 
         g2d_projectionMatrix = new GProjectionMatrix();
 		g2d_projectionMatrix.ortho(g2d_stageViewRect.width, g2d_stageViewRect.height);
+
+        g2d_projectionMatrix.prependTranslation(vx, vy, 0);
+        g2d_projectionMatrix.prependRotation(g2d_activeCamera.rotation*180/Math.PI, GVector3D.Z_AXIS, new GVector3D());
+        g2d_projectionMatrix.prependScale(g2d_activeCamera.scaleX, g2d_activeCamera.scaleY, 1);
+        g2d_projectionMatrix.prependTranslation(-g2d_activeCamera.x, -g2d_activeCamera.y, 0);
+		
 		g2d_projectionMatrix.transpose();
+		g2d_nativeContext.scissor(Std.int(g2d_activeViewRect.x), Std.int(g2d_stageViewRect.height-g2d_activeViewRect.height+g2d_activeViewRect.y), Std.int(g2d_activeViewRect.width), Std.int(g2d_activeViewRect.height));
     }
 
     inline public function getMaskRect():GRectangle {
@@ -201,9 +214,9 @@ class GWebGLContext implements IGContext implements IGInteractive
             if (g2d_activeRenderer != null) g2d_activeRenderer.push();
 
             if (p_maskRect == null) {
-                g2d_nativeContext.disable(RenderingContext.SCISSOR_TEST);
+                g2d_nativeContext.scissor(0, 0, Std.int(g2d_activeViewRect.width), Std.int(g2d_activeViewRect.height));
+
             } else {
-				g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
                 g2d_activeMaskRect = g2d_activeViewRect.intersection(p_maskRect);
                 g2d_nativeContext.scissor(Std.int(g2d_activeMaskRect.x), Std.int(g2d_activeViewRect.height-g2d_activeMaskRect.y-g2d_activeMaskRect.height), Std.int(g2d_activeMaskRect.width), Std.int(g2d_activeMaskRect.height));
             }
@@ -223,8 +236,9 @@ class GWebGLContext implements IGContext implements IGInteractive
         g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
 		setDepthTest(false, GDepthFunc.ALWAYS);
         g2d_nativeContext.enable(RenderingContext.BLEND);
+		g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
 		g2d_nativeContext.enable(RenderingContext.CULL_FACE);
-		g2d_nativeContext.cullFace(RenderingContext.BACK);
+		g2d_nativeContext.cullFace(RenderingContext.FRONT);
         GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		
 		return true;
