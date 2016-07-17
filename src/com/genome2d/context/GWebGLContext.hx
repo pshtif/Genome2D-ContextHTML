@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import com.genome2d.context.GCamera;
 import com.genome2d.context.GDepthFunc;
 import com.genome2d.geom.GVector3D;
 import com.genome2d.macros.MGDebug;
