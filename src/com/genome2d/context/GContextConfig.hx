@@ -33,8 +33,8 @@ class GContextConfig
 	public var enableErrorChecking:Bool = false;
 	public var antiAliasing:Int = 0;
 	
-    public function new(?p_viewRect:GRectangle = null) {
-		nativeStage = cast Browser.document.getElementById("canvas");
+    public function new(?p_stage:CanvasElement, ?p_viewRect:GRectangle = null) {
+		nativeStage = (p_stage == null) ? cast Browser.document.getElementById("canvas") : p_stage;
 
 		viewRect = p_viewRect;
         if (nativeStage == null) {

@@ -147,8 +147,8 @@ class GWebGLContext implements IGContext implements IGInteractive
         g2d_drawRenderer = new GQuadTextureShaderRenderer();
 
         g2d_defaultCamera = new GCamera();
-        g2d_defaultCamera.x = g2d_stageViewRect.width/2;
-        g2d_defaultCamera.y = g2d_stageViewRect.height/2;
+        g2d_defaultCamera.x = g2d_stageViewRect.width / 2;
+        g2d_defaultCamera.y = g2d_stageViewRect.height / 2;
 
         g2d_activeViewRect = new GRectangle();
         g2d_currentTime = Date.now().getTime();
