@@ -246,9 +246,12 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 	
 	inline public function draw(p_texture:GTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
-        setBlendMode(p_blendMode, p_texture.premultiplied);
-		setRenderer(g2d_drawRenderer);
-        g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture);
+		if (p_alpha != 0) {
+			setBlendMode(p_blendMode, p_texture.premultiplied);
+			setRenderer(g2d_drawRenderer);
+			
+			g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture, p_filter, false, 0, 0, 0, 0, 0, 0);
+		}
     }
 
     public function drawMatrix(p_texture:GTexture, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
@@ -256,7 +259,12 @@ class GWebGLContext implements IGContext implements IGInteractive
     }
 
     public function drawSource(p_texture:GTexture, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+		if (p_alpha != 0) {
+            setBlendMode(p_blendMode, p_texture.premultiplied);
+            setRenderer(g2d_drawRenderer);
 
+            g2d_drawRenderer.draw(p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture, p_filter, true, p_sourceX, p_sourceY, p_sourceWidth, p_sourceHeight, p_sourcePivotX, p_sourcePivotY);
+        }
     }
 
     public function drawPoly(p_texture:GTexture, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
