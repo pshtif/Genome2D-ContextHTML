@@ -9,6 +9,7 @@
 package com.genome2d.context.renderers;
 
 import com.genome2d.context.GWebGLContext;
+import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.stats.GStats;
 import com.genome2d.context.IGRenderer;
 import com.genome2d.context.IGContext;
@@ -291,8 +292,9 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_constantIndexAlphaBuffer);
         g2d_nativeContext.vertexAttribPointer(g2d_program.constantIndexAttribute, 4, RenderingContext.FLOAT, false, 0, 0);
     }
-	
-	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GTexture):Void {
+
+	@:access(com.genome2d.textures.GTexture)
+	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GTexture, p_filter:GFilter, p_overrideSource:Bool, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float):Void {
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
         var useAlpha:Bool = !g2d_useSeparatedAlphaPipeline && !(p_red==1 && p_green==1 && p_blue==1 && p_alpha==1);
         var notSameUseAlpha:Bool = g2d_activeAlpha != useAlpha;
@@ -323,15 +325,27 @@ class GQuadTextureShaderRenderer implements IGRenderer
         g2d_transforms[offset+2] = p_rotation;
         g2d_transforms[offset+3] = 0; // Reserved for id
 
-        g2d_transforms[offset+4] = p_texture.u;
-        g2d_transforms[offset+5] = p_texture.v;
-        g2d_transforms[offset+6] = p_texture.uScale;
-        g2d_transforms[offset+7] = p_texture.vScale;
+		if (p_overrideSource) {
+			g2d_transforms[offset+4] = p_sourceX / p_texture.g2d_gpuWidth;
+			g2d_transforms[offset+5] = p_sourceY / p_texture.g2d_gpuHeight;
+			g2d_transforms[offset+6] = p_sourceWidth / p_texture.g2d_gpuWidth;
+			g2d_transforms[offset+7] = p_sourceHeight / p_texture.g2d_gpuHeight;
 
-        g2d_transforms[offset+8] = p_scaleX*p_texture.width;
-        g2d_transforms[offset+9] = p_scaleY*p_texture.height;
-        g2d_transforms[offset+10] = p_scaleX*p_texture.pivotX;
-        g2d_transforms[offset+11] = p_scaleY*p_texture.pivotY;
+			g2d_transforms[offset + 8] = p_sourceWidth * p_texture.g2d_scaleFactor * p_scaleX;
+			g2d_transforms[offset + 9] = p_sourceHeight * p_texture.g2d_scaleFactor * p_scaleY;
+			g2d_transforms[offset + 10] = p_sourcePivotX * p_texture.g2d_scaleFactor * p_scaleX;
+			g2d_transforms[offset + 11] = p_sourcePivotY * p_texture.g2d_scaleFactor * p_scaleY;
+		} else {
+			g2d_transforms[offset+4] = p_texture.u;
+			g2d_transforms[offset+5] = p_texture.v;
+			g2d_transforms[offset+6] = p_texture.uScale;
+			g2d_transforms[offset+7] = p_texture.vScale;
+
+			g2d_transforms[offset + 8] = p_texture.width * p_scaleX;
+			g2d_transforms[offset + 9] = p_texture.height * p_scaleY;
+			g2d_transforms[offset + 10] = p_texture.pivotX * p_scaleX;
+			g2d_transforms[offset + 11] = p_texture.pivotY * p_scaleY;
+		}
 
         g2d_transforms[offset+12] = p_red;
         g2d_transforms[offset+13] = p_green;
