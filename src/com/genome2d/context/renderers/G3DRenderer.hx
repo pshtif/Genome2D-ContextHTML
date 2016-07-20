@@ -198,4 +198,12 @@ class G3DRenderer implements IGRenderer
     public function clear():Void {
         g2d_activeNativeTexture = null;
     }
+	
+	public function dispose():Void {
+		g2d_nativeContext.deleteBuffer(g2d_indexBuffer);
+		g2d_nativeContext.deleteBuffer(g2d_vertexBuffer);
+		g2d_nativeContext.deleteBuffer(g2d_uvBuffer);
+		
+		g2d_nativeContext.deleteProgram(g2d_program);
+	}
 }

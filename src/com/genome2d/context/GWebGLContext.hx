@@ -164,7 +164,7 @@ class GWebGLContext implements IGContext implements IGInteractive
 		
 		g2d_nativeStage.addEventListener("keyup", g2d_keyboardEventHandler);
 		g2d_nativeStage.addEventListener("keydown", g2d_keyboardEventHandler);
-		/*
+		
 		Browser.window.addEventListener("keyup", g2d_keyboardEventHandler);
 		Browser.window.addEventListener("keydown", g2d_keyboardEventHandler);
 		/**/
