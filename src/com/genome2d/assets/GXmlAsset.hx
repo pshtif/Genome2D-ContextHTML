@@ -8,7 +8,7 @@
  */
 package com.genome2d.assets;
 
-import Genome2D-ContextCommon.src.com.genome2d.assets.GAsset;
+import com.genome2d.assets.GAsset;
 import com.genome2d.debug.GDebug;
 import haxe.Http;
 import js.html.Event;
