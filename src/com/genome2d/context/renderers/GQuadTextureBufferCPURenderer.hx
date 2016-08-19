@@ -94,7 +94,7 @@ class GQuadTextureBufferCPURenderer
 		g2d_nativeContext.attachShader(g2d_program, fragmentShader);
 		g2d_nativeContext.linkProgram(g2d_program);
 
-		//if (!RenderingContext.getProgramParameter(program, RenderingContext.LINK_STATUS)) { trace("Could not initialise shaders"); }
+		//if (!RenderingContext.getProgramParameter(program, RenderingContext.LINK_STATUS)) { ("Could not initialise shaders"); }
 
 		g2d_nativeContext.useProgram(g2d_program);
 
