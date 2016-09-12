@@ -68,6 +68,22 @@ class GRectangle {
 
         return result;
     }
+	
+	public function intersects(p_rect:GRectangle):GRectangle {
+        var result:Bool = false;
+
+        var x0 = x < p_rect.x ? p_rect.x : x;
+        var x1 = right > p_rect.right ? p_rect.right : right;
+        if (x1 > x0) {
+            var y0 = y < p_rect.y ? p_rect.y : y;
+            var y1 = bottom > p_rect.bottom ? p_rect.bottom : bottom;
+            if (y1 > y0) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
 
     public function contains (p_x:Float, p_y:Float):Bool {
         return p_x >= x && p_y >= y && p_x < right && p_y < bottom;
