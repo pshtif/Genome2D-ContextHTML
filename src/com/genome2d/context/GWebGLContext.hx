@@ -182,7 +182,10 @@ class GWebGLContext implements IGContext implements IGInteractive
         g2d_defaultCamera.y = g2d_stageViewRect.height/2;
 	}
 
-    public function setActiveCamera(p_camera:GCamera):Void {
+    public function setActiveCamera(p_camera:GCamera):Bool {
+        if (g2d_stageViewRect.width*p_camera.normalizedViewWidth <= 0 ||
+            g2d_stageViewRect.height*p_camera.normalizedViewHeight <= 0) return false;
+
 		if (g2d_activeRenderer != null) g2d_activeRenderer.push();
 		
 		g2d_activeCamera = p_camera;
@@ -205,6 +208,8 @@ class GWebGLContext implements IGContext implements IGInteractive
 		
 		g2d_projectionMatrix.transpose();
 		g2d_nativeContext.scissor(Std.int(g2d_activeViewRect.x), Std.int(g2d_stageViewRect.height-g2d_activeViewRect.height+g2d_activeViewRect.y), Std.int(g2d_activeViewRect.width), Std.int(g2d_activeViewRect.height));
+
+        return true;
     }
 
     inline public function getMaskRect():GRectangle {
