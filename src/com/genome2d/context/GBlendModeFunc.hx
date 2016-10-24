@@ -13,9 +13,9 @@ import js.html.webgl.RenderingContext;
 /**
 
 **/
-class GBlendMode
+class GBlendModeFunc
 {
-	private static var blendFactors:Array<Array<Array<Int>>> = [
+	private static var blendFactors:Array<Map<GBlendMode,Array<Int>>> = [
 		[
 			[RenderingContext.ONE, RenderingContext.ZERO],
 			[RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA],
