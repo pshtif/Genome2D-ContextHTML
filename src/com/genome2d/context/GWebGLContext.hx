@@ -24,7 +24,7 @@ import js.Browser;
 import com.genome2d.callbacks.GCallback.GCallback0;
 import com.genome2d.callbacks.GCallback.GCallback1;
 import com.genome2d.callbacks.GCallback.GCallback2;
-import com.genome2d.input.IGInteractive;
+import com.genome2d.input.IGFocusable;
 import com.genome2d.textures.GTexture;
 import com.genome2d.context.IGRenderer;
 import com.genome2d.context.renderers.GRendererCommon;
@@ -41,9 +41,9 @@ import com.genome2d.context.renderers.GQuadTextureShaderRenderer;
 
 #if genome_webglonly
 @:native("com.genome2d.context.IGContext")
-class GWebGLContext implements IGInteractive
+class GWebGLContext implements IGFocusable
 #else
-class GWebGLContext implements IGContext implements IGInteractive
+class GWebGLContext implements IGContext implements IGFocusable
 #end
 {
     public function hasFeature(p_feature:Int):Bool {
