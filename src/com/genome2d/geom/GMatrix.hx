@@ -89,4 +89,35 @@ class GMatrix {
 
         return this;
     }
+
+    public function scale(p_scaleX:Float, p_scaleY:Float):Void {
+        a *= p_scaleX;
+        b *= p_scaleY;
+        c *= p_scaleX;
+        d *= p_scaleY;
+        tx *= p_scaleX;
+        ty *= p_scaleY;
+    }
+
+    public function rotate (p_angle:Float):Void {
+        var cos:Float = Math.cos(p_angle);
+        var sin:Float = Math.sin(p_angle);
+
+        var a1 = a * cos - b * sin;
+        b = a * sin + b * cos;
+        a = a1;
+
+        var c1 = c * cos - d * sin;
+        d = c * sin + d * cos;
+        c = c1;
+
+        var tx1 = tx * cos - ty * sin;
+        ty = tx * sin + ty * cos;
+        tx = tx1;
+    }
+
+    public function translate(p_x:Float, p_y:Float):Void {
+        tx += p_x;
+        ty += p_y;
+    }
 }

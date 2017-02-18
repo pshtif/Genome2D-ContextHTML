@@ -69,7 +69,7 @@ class GRectangle {
         return result;
     }
 	
-	public function intersects(p_rect:GRectangle):GRectangle {
+	public function intersects(p_rect:GRectangle):Bool {
         var result:Bool = false;
 
         var x0 = x < p_rect.x ? p_rect.x : x;

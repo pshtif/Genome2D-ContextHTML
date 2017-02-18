@@ -55,6 +55,7 @@ class G3DRenderer implements IGRenderer
 	inline static private var VERTEX_SHADER_CODE:String = 
             "
 			uniform mat4 projectionMatrix;
+			uniform mat4 cameraMatrix;
 			uniform mat4 modelMatrix;
 
 			attribute vec3 aPosition;
@@ -67,6 +68,7 @@ class G3DRenderer implements IGRenderer
 				vUv = aUv;
 				gl_Position =  vec4(aPosition.x, aPosition.y, aPosition.z, 1);
 				gl_Position = gl_Position * modelMatrix;
+				gl_Position = gl_Position * cameraMatrix;
 				gl_Position = gl_Position * projectionMatrix;
 			}
 		";
@@ -104,6 +106,7 @@ class G3DRenderer implements IGRenderer
 		for (i in 0...p_indices.length) g2d_indices[i] = p_indices[i];
 		
 		modelMatrix = new GMatrix3D();
+		cameraMatrix = new GMatrix3D();
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -171,6 +174,9 @@ class G3DRenderer implements IGRenderer
 		var transposedMatrix:GMatrix3D = modelMatrix.clone();
 		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "modelMatrix"), false,  transposedMatrix.rawData);
+		transposedMatrix = cameraMatrix.clone();
+		transposedMatrix.transpose();
+		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "cameraMatrix"), false,  transposedMatrix.rawData);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);

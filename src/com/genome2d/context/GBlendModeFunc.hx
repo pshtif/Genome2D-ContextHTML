@@ -17,20 +17,20 @@ class GBlendModeFunc
 {
 	private static var blendFactors:Array<Map<GBlendMode,Array<Int>>> = [
 		[
-			[RenderingContext.ONE, RenderingContext.ZERO],
-			[RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA],
-			[RenderingContext.SRC_ALPHA, RenderingContext.BLEND_DST_ALPHA],
-			[RenderingContext.BLEND_DST_RGB, RenderingContext.ONE_MINUS_SRC_ALPHA],
-			[RenderingContext.SRC_ALPHA, RenderingContext.ONE],
-			[RenderingContext.ZERO, RenderingContext.ONE_MINUS_SRC_ALPHA],
+			GBlendMode.NONE => [RenderingContext.ONE, RenderingContext.ZERO],
+			GBlendMode.NORMAL => [RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA],
+			GBlendMode.ADD => [RenderingContext.SRC_ALPHA, RenderingContext.BLEND_DST_ALPHA],
+			GBlendMode.MULTIPLY => [RenderingContext.BLEND_DST_RGB, RenderingContext.ONE_MINUS_SRC_ALPHA],
+			GBlendMode.SCREEN => [RenderingContext.SRC_ALPHA, RenderingContext.ONE],
+			GBlendMode.ERASE => [RenderingContext.ZERO, RenderingContext.ONE_MINUS_SRC_ALPHA],
 		],
-		[ 
-			[RenderingContext.ONE, RenderingContext.ZERO],
-			[RenderingContext.ONE, RenderingContext.ONE_MINUS_SRC_ALPHA],
-			[RenderingContext.ONE, RenderingContext.ONE],
-			[RenderingContext.BLEND_DST_RGB, RenderingContext.ONE_MINUS_SRC_ALPHA],
-			[RenderingContext.ONE, RenderingContext.ONE_MINUS_SRC_COLOR],
-			[RenderingContext.ZERO, RenderingContext.ONE_MINUS_SRC_ALPHA],
+		[
+			GBlendMode.NONE => [RenderingContext.ONE, RenderingContext.ZERO],
+			GBlendMode.NORMAL => [RenderingContext.ONE, RenderingContext.ONE_MINUS_SRC_ALPHA],
+			GBlendMode.ADD => [RenderingContext.ONE, RenderingContext.ONE],
+			GBlendMode.MULTIPLY => [RenderingContext.BLEND_DST_RGB, RenderingContext.ONE_MINUS_SRC_ALPHA],
+			GBlendMode.SCREEN => [RenderingContext.ONE, RenderingContext.ONE_MINUS_SRC_COLOR],
+			GBlendMode.ERASE => [RenderingContext.ZERO, RenderingContext.ONE_MINUS_SRC_ALPHA],
 		]
 	];
 	
@@ -40,15 +40,17 @@ class GBlendModeFunc
 	inline static public var MULTIPLY:Int = 3;
 	inline static public var SCREEN:Int = 4;
 	inline static public var ERASE:Int = 5;
-	
+
+	/*
 	static public function addBlendMode(p_normalFactors:Array<Int>, p_premultipliedFactors:Array<Int>):Int {
 		blendFactors[0].push(p_normalFactors);
 		blendFactors[1].push(p_premultipliedFactors);
 		
 		return blendFactors[0].length;
 	}
+	/**/
 	
-	static public function setBlendMode(p_context:RenderingContext, p_mode:Int, p_premultiplied:Bool):Void {
+	static public function setBlendMode(p_context:RenderingContext, p_mode:GBlendMode, p_premultiplied:Bool):Void {
 		var p:Int = (p_premultiplied) ? 1 : 0;
         p_context.blendFunc(blendFactors[p][p_mode][0], blendFactors[p][p_mode][1]);
 	}

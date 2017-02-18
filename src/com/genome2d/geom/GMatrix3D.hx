@@ -221,4 +221,15 @@ class GMatrix3D {
 		
 		return m;
 	}
+
+	public function transformVector(p_vector:GVector3D):GVector3D {
+		var x = p_vector.x;
+		var y = p_vector.y;
+		var z = p_vector.z;
+
+		return new GVector3D((x * rawData[0] + y * rawData[4] + z * rawData[8] + rawData[12]),
+							 (x * rawData[1] + y * rawData[5] + z * rawData[9] + rawData[13]),
+							 (x * rawData[2] + y * rawData[6] + z * rawData[10] + rawData[14]),
+							 (x * rawData[3] + y * rawData[7] + z * rawData[11] + rawData[15]));
+	}
 }

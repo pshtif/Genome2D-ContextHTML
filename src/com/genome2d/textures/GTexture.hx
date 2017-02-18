@@ -113,6 +113,13 @@ class GTexture extends GTextureBase
 			//g2d_nativeImage = cast g2d_nativeSource;
 		}
     }
+
+	/*
+	 * 	Get an instance from reference
+	 */
+	static public function fromReference(p_reference:String) {
+		return GTextureManager.getTexture(p_reference.substr(1));
+	}
 	
 	/****************************************************************************************************
 	 * 	GPU DEPENDANT PROPERTIES

@@ -39,12 +39,8 @@ import com.genome2d.input.GMouseInputType;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.renderers.GQuadTextureShaderRenderer;
 
-#if genome_webglonly
 @:native("com.genome2d.context.IGContext")
 class GWebGLContext implements IGFocusable
-#else
-class GWebGLContext implements IGContext implements IGFocusable
-#end
 {
     public function hasFeature(p_feature:Int):Bool {
         switch (p_feature) {
@@ -72,7 +68,7 @@ class GWebGLContext implements IGContext implements IGFocusable
 	private var g2d_drawRenderer:GQuadTextureShaderRenderer;
 
     private var g2d_activeRenderer:IGRenderer;
-	private var g2d_activeBlendMode:Int;
+	private var g2d_activeBlendMode:GBlendMode;
 	private var g2d_activePremultiply:Bool;
 	private var g2d_activeMaskRect:GRectangle;
 
@@ -245,12 +241,12 @@ class GWebGLContext implements IGContext implements IGFocusable
 		g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
 		g2d_nativeContext.enable(RenderingContext.CULL_FACE);
 		g2d_nativeContext.cullFace(RenderingContext.FRONT);
-        GBlendMode.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
+        GBlendModeFunc.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		
 		return true;
     }
 	
-	inline public function draw(p_texture:GTexture, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+	inline public function draw(p_texture:GTexture, p_blendMode:GBlendMode, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {
 		if (p_alpha != 0) {
 			setBlendMode(p_blendMode, p_texture.premultiplied);
 			setRenderer(g2d_drawRenderer);
@@ -259,11 +255,11 @@ class GWebGLContext implements IGContext implements IGFocusable
 		}
     }
 
-    public function drawMatrix(p_texture:GTexture, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
+    public function drawMatrix(p_texture:GTexture, p_blendMode:GBlendMode, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_filter:GFilter = null):Void {
 
     }
 
-    public function drawSource(p_texture:GTexture, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int = 1, p_filter:GFilter = null):Void {
+    public function drawSource(p_texture:GTexture, p_blendMode:GBlendMode, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {
 		if (p_alpha != 0) {
             setBlendMode(p_blendMode, p_texture.premultiplied);
             setRenderer(g2d_drawRenderer);
@@ -272,7 +268,7 @@ class GWebGLContext implements IGContext implements IGFocusable
         }
     }
 
-    public function drawPoly(p_texture:GTexture, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_blendMode:Int=1, p_filter:GFilter = null):Void {
+    public function drawPoly(p_texture:GTexture, p_blendMode:GBlendMode, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {
 
     }
 
@@ -463,7 +459,7 @@ class GWebGLContext implements IGContext implements IGFocusable
 		}
     }
 	
-	public function setBlendMode(p_blendMode:Int, p_premultiplied:Bool):Void {
+	public function setBlendMode(p_blendMode:GBlendMode, p_premultiplied:Bool):Void {
 		if (p_blendMode != g2d_activeBlendMode || p_premultiplied != g2d_activePremultiply) {
             if (g2d_activeRenderer != null) {
                 g2d_activeRenderer.push();
@@ -471,7 +467,15 @@ class GWebGLContext implements IGContext implements IGFocusable
 
             g2d_activeBlendMode = p_blendMode;
             g2d_activePremultiply = p_premultiplied;
-            GBlendMode.setBlendMode(g2d_nativeContext, g2d_activeBlendMode, g2d_activePremultiply);
+            GBlendModeFunc.setBlendMode(g2d_nativeContext, g2d_activeBlendMode, g2d_activePremultiply);
         }
 	}
+
+    private function gotFocus():Void {
+
+    }
+
+    private function lostFocus():Void {
+
+    }
 }
