@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import com.genome2d.context.renderers.GMatrixQuadTextureShaderRenderer;
 import com.genome2d.context.GCamera;
 import com.genome2d.context.GDepthFunc;
 import com.genome2d.geom.GVector3D;
@@ -66,6 +67,7 @@ class GWebGLContext implements IGFocusable
     }
 
 	private var g2d_drawRenderer:GQuadTextureShaderRenderer;
+    private var g2d_matrixQuadTextureShaderRenderer:GMatrixQuadTextureShaderRenderer;
 
     private var g2d_activeRenderer:IGRenderer;
 	private var g2d_activeBlendMode:GBlendMode;
@@ -141,6 +143,7 @@ class GWebGLContext implements IGFocusable
         GRendererCommon.init();
 
         g2d_drawRenderer = new GQuadTextureShaderRenderer();
+        g2d_matrixQuadTextureShaderRenderer = new GMatrixQuadTextureShaderRenderer();
 
         g2d_defaultCamera = new GCamera();
         g2d_defaultCamera.x = g2d_stageViewRect.width / 2;
@@ -255,8 +258,13 @@ class GWebGLContext implements IGFocusable
 		}
     }
 
-    public function drawMatrix(p_texture:GTexture, p_blendMode:GBlendMode, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_filter:GFilter = null):Void {
-
+    inline public function drawMatrix(p_texture:GTexture, p_blendMode:GBlendMode, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_filter:GFilter = null):Void {
+        if (p_alpha != 0) {
+            setBlendMode(p_blendMode, p_texture.premultiplied);
+            setRenderer(g2d_matrixQuadTextureShaderRenderer);
+            g2d_matrixQuadTextureShaderRenderer.draw(p_a, p_b, p_c, p_d, p_tx, p_ty, p_red, p_green, p_blue, p_alpha, p_texture, p_filter, false, 0, 0, 0, 0);
+        }
+        /**/
     }
 
     public function drawSource(p_texture:GTexture, p_blendMode:GBlendMode, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {

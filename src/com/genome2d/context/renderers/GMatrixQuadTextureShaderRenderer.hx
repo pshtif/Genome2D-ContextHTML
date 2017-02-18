@@ -24,57 +24,13 @@ import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
 import js.html.Float32Array;
 
-class GQuadTextureShaderRenderer implements IGRenderer
+class GMatrixQuadTextureShaderRenderer implements IGRenderer
 {
     inline static private var BATCH_SIZE:Int = 30;
 
     inline static private var TRANSFORM_PER_VERTEX:Int = 3;
     inline static private var TRANSFORM_PER_VERTEX_ALPHA:Int = TRANSFORM_PER_VERTEX+1;
 
-    /*
-    inline static private var VERTEX_SHADER_CODE:String =
-    "
-			uniform mat4 projectionMatrix;
-			uniform vec4 transforms["+BATCH_SIZE*TRANSFORM_PER_VERTEX+"];
-
-			attribute vec2 aPosition;
-			attribute vec2 aTexCoord;
-			attribute vec3 aConstantIndex;
-
-			varying vec2 vTexCoord;
-
-			void main(void)
-			{
-				gl_Position = vec4(aPosition.x*transforms[int(aConstantIndex.z)].x, aPosition.y*transforms[int(aConstantIndex.z)].y, 0, 1);
-				gl_Position = vec4(gl_Position.x - transforms[int(aConstantIndex.z)].z, gl_Position.y - transforms[int(aConstantIndex.z)].w, 0, 1);
-				float c = cos(transforms[int(aConstantIndex.x)].z);
-				float s = sin(transforms[int(aConstantIndex.x)].z);
-				gl_Position = vec4(gl_Position.x * c - gl_Position.y * s, gl_Position.x * s + gl_Position.y * c, 0, 1);
-				gl_Position = vec4(gl_Position.x+transforms[int(aConstantIndex.x)].x, gl_Position.y+transforms[int(aConstantIndex.x)].y, 0, 1);
-				gl_Position = gl_Position * projectionMatrix;
-
-				vTexCoord = vec2(aTexCoord.x*transforms[int(aConstantIndex.y)].z+transforms[int(aConstantIndex.y)].x, aTexCoord.y*transforms[int(aConstantIndex.y)].w+transforms[int(aConstantIndex.y)].y);
-			}
-		 ";
-
-    inline static private var FRAGMENT_SHADER_CODE:String =
-    "
-			#ifdef GL_ES
-			precision highp float;
-			#endif
-
-			varying vec2 vTexCoord;
-
-			uniform sampler2D sTexture;
-
-			void main(void)
-			{
-				vec4 texColor;
-				texColor = texture2D(sTexture, vTexCoord);
-				gl_FragColor = texColor;
-			}
-		";
-    /**/
     inline static private var VERTEX_SHADER_CODE_ALPHA:String =
     "
 			uniform mat4 projectionMatrix;
@@ -89,17 +45,18 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
 			void main(void)
 			{
-			    vec2 temp = vec2(aPosition.x*transforms[int(aConstantIndex.z)].x, aPosition.y*transforms[int(aConstantIndex.z)].y);
-			    temp.x -= transforms[int(aConstantIndex.z)].z;
-			    temp.y -= transforms[int(aConstantIndex.z)].w;
-				float c = cos(transforms[int(aConstantIndex.x)].z);
-				float s = sin(transforms[int(aConstantIndex.x)].z);
-				temp = vec2(temp.x * c - temp.y * s, temp.x * s + temp.y * c);
-                temp.x += transforms[int(aConstantIndex.x)].x;
-                temp.y += transforms[int(aConstantIndex.x)].y;
-				gl_Position = vec4(temp.x, temp.y, 0, 1) * projectionMatrix;
+				vec2 temp1 = vec2(aPosition.x * transforms[int(aConstantIndex.y)].z, aPosition.y * transforms[int(aConstantIndex.y)].w);
+				vec2 temp2 = vec2(temp1.x * transforms[int(aConstantIndex.x)].x, temp1.y * transforms[int(aConstantIndex.x)].y);
+				temp2.x += temp2.y;
+				temp2.x += transforms[int(aConstantIndex.y)].x;
 
-				vTexCoord = vec2(aTexCoord.x*transforms[int(aConstantIndex.y)].z+transforms[int(aConstantIndex.y)].x, aTexCoord.y*transforms[int(aConstantIndex.y)].w+transforms[int(aConstantIndex.y)].y);
+				vec2 temp3 = vec2(temp1.x * transforms[int(aConstantIndex.x)].z, temp1.y * transforms[int(aConstantIndex.x)].w);
+				temp3.x += temp3.y;
+				temp3.x += transforms[int(aConstantIndex.y)].y;
+
+				gl_Position = vec4(temp2.x, temp3.x, 0, 1) * projectionMatrix;
+
+				vTexCoord = vec2(aTexCoord.x*transforms[int(aConstantIndex.z)].z+transforms[int(aConstantIndex.z)].x, aTexCoord.y*transforms[int(aConstantIndex.z)].w+transforms[int(aConstantIndex.z)].y);
 				vColor = transforms[int(aConstantIndex.w)];
 			}
 		 ";
@@ -296,7 +253,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
     }
 
 	@:access(com.genome2d.textures.GTexture)
-	inline public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GTexture, p_filter:GFilter, p_overrideSource:Bool, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float):Void {
+    inline public function draw(p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_texture:GTexture, p_filter:GFilter, p_overrideSource:Bool, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float):Void {
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
         var useAlpha:Bool = !g2d_useSeparatedAlphaPipeline && !(p_red==1 && p_green==1 && p_blue==1 && p_alpha==1);
         var notSameUseAlpha:Bool = g2d_activeAlpha != useAlpha;
@@ -313,46 +270,67 @@ class GQuadTextureShaderRenderer implements IGRenderer
                 untyped g2d_nativeContext.uniform1i(g2d_program.samplerUniform, 0);
             }
         }
-		
+
+        var uvx:Float;
+        var uvy:Float;
+        var uvsx:Float;
+        var uvsy:Float;
+        var sx:Float;
+        var sy:Float;
+        var px:Float;
+        var py:Float;
+        if (p_overrideSource) {
+            uvx = p_sourceX / p_texture.nativeWidth;
+            uvy = p_sourceY / p_texture.nativeHeight;
+            uvsx = p_sourceWidth / p_texture.nativeWidth;
+            uvsy = p_sourceHeight / p_texture.nativeHeight;
+            sx = p_sourceWidth;
+            sy = p_sourceHeight;
+            px = 0;
+            py = 0;
+        } else {
+            uvx = p_texture.g2d_u;
+            uvy = p_texture.g2d_v;
+            uvsx = p_texture.g2d_uScale;
+            uvsy = p_texture.g2d_vScale;
+            sx = p_texture.width;
+            sy = p_texture.height;
+            px = p_texture.pivotX;
+            py = p_texture.pivotY;
+        }
+
+        if (px != 0 || py != 0) {
+            p_tx = p_tx - px*p_a - py*p_c;
+            p_ty = p_ty - px*p_b - py*p_d;
+        }
+
         // Alpha is active and textures uses premultiplied source
-        if (g2d_activeAlpha) {
+        if (g2d_activeAlpha && p_texture.premultiplied) {
             p_red*=p_alpha;
             p_green*=p_alpha;
             p_blue*=p_alpha;
         }
         /**/
         var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA<<2;
-        g2d_transforms[offset] = p_x;
-        g2d_transforms[offset+1] = p_y;
-        g2d_transforms[offset+2] = p_rotation;
-        g2d_transforms[offset+3] = 0; // Reserved for id
+        g2d_transforms[offset] = p_a;
+        g2d_transforms[offset+1] = p_c;
+        g2d_transforms[offset+2] = p_b;
+        g2d_transforms[offset+3] = p_d;
 
-		if (p_overrideSource) {
-			g2d_transforms[offset+4] = p_sourceX / p_texture.g2d_gpuWidth;
-			g2d_transforms[offset+5] = p_sourceY / p_texture.g2d_gpuHeight;
-			g2d_transforms[offset+6] = p_sourceWidth / p_texture.g2d_gpuWidth;
-			g2d_transforms[offset+7] = p_sourceHeight / p_texture.g2d_gpuHeight;
+        g2d_transforms[offset+4] = p_tx;
+        g2d_transforms[offset+5] = p_ty;
+        g2d_transforms[offset+6] = sx;
+        g2d_transforms[offset+7] = sy;
 
-			g2d_transforms[offset + 8] = p_sourceWidth * p_texture.g2d_scaleFactor * p_scaleX;
-			g2d_transforms[offset + 9] = p_sourceHeight * p_texture.g2d_scaleFactor * p_scaleY;
-			g2d_transforms[offset + 10] = p_sourcePivotX * p_texture.g2d_scaleFactor * p_scaleX;
-			g2d_transforms[offset + 11] = p_sourcePivotY * p_texture.g2d_scaleFactor * p_scaleY;
-		} else {
-			g2d_transforms[offset+4] = p_texture.u;
-			g2d_transforms[offset+5] = p_texture.v;
-			g2d_transforms[offset+6] = p_texture.uScale;
-			g2d_transforms[offset+7] = p_texture.vScale;
+        g2d_transforms[offset + 8] = uvx;
+        g2d_transforms[offset + 9] = uvy;
+        g2d_transforms[offset + 10] = uvsx;
+        g2d_transforms[offset + 11] = uvsy;
 
-			g2d_transforms[offset + 8] = p_texture.width * p_scaleX;
-			g2d_transforms[offset + 9] = p_texture.height * p_scaleY;
-			g2d_transforms[offset + 10] = p_texture.pivotX * p_scaleX;
-			g2d_transforms[offset + 11] = p_texture.pivotY * p_scaleY;
-		}
-
-        g2d_transforms[offset+12] = p_red;
-        g2d_transforms[offset+13] = p_green;
-        g2d_transforms[offset+14] = p_blue;
-        g2d_transforms[offset+15] = p_alpha;
+        g2d_transforms[offset + 12] = p_red;
+        g2d_transforms[offset + 13] = p_green;
+        g2d_transforms[offset + 14] = p_blue;
+        g2d_transforms[offset + 15] = p_alpha;
 
 		g2d_quadCount++;
 
