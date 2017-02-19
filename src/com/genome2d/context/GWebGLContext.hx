@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import com.genome2d.context.renderers.GTriangleTextureBufferCPURenderer;
 import com.genome2d.context.renderers.GMatrixQuadTextureShaderRenderer;
 import com.genome2d.context.GCamera;
 import com.genome2d.context.GDepthFunc;
@@ -68,6 +69,7 @@ class GWebGLContext implements IGFocusable
 
 	private var g2d_drawRenderer:GQuadTextureShaderRenderer;
     private var g2d_matrixQuadTextureShaderRenderer:GMatrixQuadTextureShaderRenderer;
+    private var g2d_triangleTextureBufferCPURenderer:GTriangleTextureBufferCPURenderer;
 
     private var g2d_activeRenderer:IGRenderer;
 	private var g2d_activeBlendMode:GBlendMode;
@@ -144,6 +146,7 @@ class GWebGLContext implements IGFocusable
 
         g2d_drawRenderer = new GQuadTextureShaderRenderer();
         g2d_matrixQuadTextureShaderRenderer = new GMatrixQuadTextureShaderRenderer();
+        g2d_triangleTextureBufferCPURenderer = new GTriangleTextureBufferCPURenderer();
 
         g2d_defaultCamera = new GCamera();
         g2d_defaultCamera.x = g2d_stageViewRect.width / 2;
@@ -276,8 +279,13 @@ class GWebGLContext implements IGFocusable
         }
     }
 
-    public function drawPoly(p_texture:GTexture, p_blendMode:GBlendMode, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {
+    inline public function drawPoly(p_texture:GTexture, p_blendMode:GBlendMode, p_vertices:Array<Float>, p_uvs:Array<Float>, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {
+        if (p_alpha != 0) {
+            setBlendMode(p_blendMode, p_texture.premultiplied);
+            setRenderer(g2d_triangleTextureBufferCPURenderer);
 
+            g2d_triangleTextureBufferCPURenderer.draw(p_vertices, p_uvs, p_x, p_y, p_scaleX, p_scaleY, p_rotation, p_red, p_green, p_blue, p_alpha, p_texture, p_filter);
+        }
     }
 
 	public function end():Void {
