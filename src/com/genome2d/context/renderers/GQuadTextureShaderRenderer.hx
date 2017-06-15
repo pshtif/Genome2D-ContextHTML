@@ -8,6 +8,7 @@
  */
 package com.genome2d.context.renderers;
 
+import com.genome2d.textures.GTextureSourceType;
 import com.genome2d.context.GWebGLContext;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.stats.GStats;
@@ -277,6 +278,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 	}
 
     public function bind(p_context:IGContext, p_reinitialize:Int):Void {
+
         if (p_reinitialize != g2d_initialized) initialize(cast p_context);
 		g2d_initialized = p_reinitialize;
 		
@@ -344,7 +346,8 @@ class GQuadTextureShaderRenderer implements IGRenderer
 			g2d_transforms[offset+7] = p_texture.vScale;
 
 			g2d_transforms[offset + 8] = p_texture.width * p_scaleX;
-			g2d_transforms[offset + 9] = p_texture.height * p_scaleY;
+            // Flip the quad when FBO is used as texture
+			g2d_transforms[offset + 9] = (p_texture.getSourceType() == GTextureSourceType.RENDER_TARGET) ? -p_texture.height * p_scaleY : p_texture.height * p_scaleY;
 			g2d_transforms[offset + 10] = p_texture.pivotX * p_scaleX;
 			g2d_transforms[offset + 11] = p_texture.pivotY * p_scaleY;
 		}

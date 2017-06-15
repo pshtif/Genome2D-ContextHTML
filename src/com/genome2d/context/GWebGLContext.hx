@@ -133,7 +133,7 @@ class GWebGLContext implements IGFocusable
 	public function init():Void {
         try {
             g2d_nativeContext = g2d_nativeStage.getContext("webgl");
-            if (g2d_nativeContext == null) g2d_nativeContext = g2d_nativeStage.getContext("experimental-webgl");
+            if (g2d_nativeContext == null) g2d_nativeContext = g2d_nativeStage.getContext("webgl");
         } catch (e:Dynamic) {
         }
 
@@ -245,8 +245,9 @@ class GWebGLContext implements IGFocusable
 		setDepthTest(false, GDepthFunc.ALWAYS);
         g2d_nativeContext.enable(RenderingContext.BLEND);
 		g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
-		g2d_nativeContext.enable(RenderingContext.CULL_FACE);
-		g2d_nativeContext.cullFace(RenderingContext.FRONT);
+        // Culling is not necessary for 2D and we can also run into issue due to flipped FBOs
+		g2d_nativeContext.disable(RenderingContext.CULL_FACE);
+		//g2d_nativeContext.cullFace(RenderingContext.FRONT);
         GBlendModeFunc.setBlendMode(g2d_nativeContext, GBlendMode.NORMAL, true);
 		
 		return true;
@@ -340,7 +341,10 @@ class GWebGLContext implements IGFocusable
 		if (g2d_renderTarget == p_texture && g2d_usedRenderTargets == 0) return;
 		
 		// If there is any active renderer we will push it to the current target
-		if (g2d_activeRenderer != null) g2d_activeRenderer.push();
+		if (g2d_activeRenderer != null) {
+            g2d_activeRenderer.push();
+            g2d_activeRenderer = null;
+        }
 		
 		// Doesn't support MRT yet but we will reset it anyway
 		g2d_usedRenderTargets = 0;
@@ -357,8 +361,6 @@ class GWebGLContext implements IGFocusable
 			if (p_texture.nativeTexture == null) MGDebug.G2D_WARNING("Null render texture, will incorrectly render to backbuffer instead.");
 			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, p_texture.getFrameBuffer());
 			g2d_nativeContext.viewport(0, 0, Std.int(p_texture.nativeWidth), Std.int(p_texture.nativeHeight));
-			
-            //g2d_nativeContext.setScissorRectangle(null);
             if (p_texture.needClearAsRenderTarget(p_clear)) {
 				g2d_nativeContext.clearColor(0, 0, 0, 0);
 				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
@@ -368,8 +370,6 @@ class GWebGLContext implements IGFocusable
 			g2d_projectionMatrix = new GProjectionMatrix();
 			g2d_projectionMatrix.orthoRtt(p_texture.nativeWidth, p_texture.nativeHeight);
 			g2d_projectionMatrix.transpose();
-
-			//g2d_nativeContext.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, GProjectionMatrix.getOrtho(p_texture.nativeWidth, p_texture.nativeHeight, p_transform), true);
 		}
 
         g2d_renderTargetMatrix = p_transform;
