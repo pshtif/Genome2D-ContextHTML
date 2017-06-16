@@ -363,7 +363,7 @@ class GWebGLContext implements IGFocusable
 			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, p_texture.getFrameBuffer());
 			g2d_nativeContext.viewport(0, 0, Std.int(p_texture.nativeWidth), Std.int(p_texture.nativeHeight));
             if (p_texture.needClearAsRenderTarget(p_clear)) {
-				g2d_nativeContext.clearColor(1, 0, 0, 1);
+				g2d_nativeContext.clearColor(0, 0, 0, 0);
 				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
 			}
 			
