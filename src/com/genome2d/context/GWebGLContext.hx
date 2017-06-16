@@ -353,6 +353,7 @@ class GWebGLContext implements IGFocusable
 		if (p_texture == null) {
 			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, null);
 			g2d_nativeContext.viewport(0, 0, Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
+            g2d_nativeContext.enable(RenderingContext.SCISSOR_TEST);
 
             // Reset camera
             setActiveCamera(g2d_activeCamera);
@@ -362,7 +363,7 @@ class GWebGLContext implements IGFocusable
 			g2d_nativeContext.bindFramebuffer(RenderingContext.FRAMEBUFFER, p_texture.getFrameBuffer());
 			g2d_nativeContext.viewport(0, 0, Std.int(p_texture.nativeWidth), Std.int(p_texture.nativeHeight));
             if (p_texture.needClearAsRenderTarget(p_clear)) {
-				g2d_nativeContext.clearColor(0, 0, 0, 0);
+				g2d_nativeContext.clearColor(1, 0, 0, 1);
 				g2d_nativeContext.clear(RenderingContext.COLOR_BUFFER_BIT | RenderingContext.DEPTH_BUFFER_BIT);
 			}
 			
@@ -370,6 +371,7 @@ class GWebGLContext implements IGFocusable
 			g2d_projectionMatrix = new GProjectionMatrix();
 			g2d_projectionMatrix.orthoRtt(p_texture.nativeWidth, p_texture.nativeHeight);
 			g2d_projectionMatrix.transpose();
+            g2d_nativeContext.disable(RenderingContext.SCISSOR_TEST);
 		}
 
         g2d_renderTargetMatrix = p_transform;
