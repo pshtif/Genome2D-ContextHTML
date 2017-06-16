@@ -347,7 +347,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
 			g2d_transforms[offset + 8] = p_texture.width * p_scaleX;
             // Flip the quad when FBO is used as texture
-			g2d_transforms[offset + 9] = (p_texture.getSourceType() == GTextureSourceType.RENDER_TARGET) ? -p_texture.height * p_scaleY : p_texture.height * p_scaleY;
+			g2d_transforms[offset + 9] = (p_texture.g2d_inverted) ? -p_texture.height * p_scaleY : p_texture.height * p_scaleY;
 			g2d_transforms[offset + 10] = p_texture.pivotX * p_scaleX;
 			g2d_transforms[offset + 11] = p_texture.pivotY * p_scaleY;
 		}

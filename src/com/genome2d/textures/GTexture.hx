@@ -51,6 +51,7 @@ class GTexture extends GTextureBase
 				g2d_nativeWidth = parent.g2d_nativeWidth;
 				g2d_nativeHeight = parent.g2d_nativeHeight;
 				g2d_nativeTexture = parent.nativeTexture;
+				g2d_inverted = parent.g2d_inverted;
 				g2d_sourceType = GTextureSourceType.TEXTURE;
 			} else {
                 GDebug.error("Invalid texture source.");
@@ -86,7 +87,9 @@ class GTexture extends GTextureBase
 						if (nativeTexture == null || p_reinitialize) {
 							g2d_nativeTexture = nativeContext.createTexture();
 						}
-						
+
+						g2d_inverted = true;
+
 						nativeContext.bindTexture(RenderingContext.TEXTURE_2D, nativeTexture);
                         nativeContext.texImage2D(RenderingContext.TEXTURE_2D, 0, RenderingContext.RGBA, g2d_gpuWidth, g2d_gpuHeight, 0, RenderingContext.RGBA, RenderingContext.UNSIGNED_BYTE, null);
 						nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
