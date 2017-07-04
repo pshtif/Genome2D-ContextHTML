@@ -117,6 +117,13 @@ class GTexture extends GTextureBase
 		}
     }
 
+	override public function dispose(p_disposeSource:Bool = false):Void {
+		if (g2d_sourceType != GTextureSourceType.TEXTURE && g2d_nativeTexture != null) cast (g2d_context,GWebGLContext).getNativeContext().deleteTexture(g2d_nativeTexture);
+		g2d_nativeTexture = null;
+
+		super.dispose(p_disposeSource);
+	}
+
 	/*
 	 * 	Get an instance from reference
 	 */

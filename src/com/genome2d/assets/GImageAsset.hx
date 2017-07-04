@@ -34,13 +34,20 @@ class GImageAsset extends GAsset
 
     override public function load():Void {
 		g2d_imageElement = Browser.document.createImageElement();
-		g2d_imageElement.onload = loadedHandler;
+        g2d_imageElement.onerror = error_handler;
+		g2d_imageElement.onload = loaded_handler;
 		g2d_imageElement.src = g2d_url;
     }
 
-    private function loadedHandler(event:Event):Void {
+    private function loaded_handler(event:Event):Void {
 		g2d_type = GImageAssetType.IMAGEELEMENT;
         g2d_loaded = true;
         onLoaded.dispatch(this);
+    }
+
+    private function error_handler(event:Event):Void {
+        g2d_type = GImageAssetType.IMAGEELEMENT;
+        g2d_loaded = false;
+        onFailed.dispatch(this);
     }
 }
