@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import js.html.DOMRect;
 import com.genome2d.context.renderers.GTriangleTextureBufferCPURenderer;
 import com.genome2d.context.renderers.GMatrixQuadTextureShaderRenderer;
 import com.genome2d.context.GCamera;
@@ -404,8 +405,9 @@ class GWebGLContext implements IGFocusable
 		var shiftKey:Bool = false;
         if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
-            mx = me.pageX - g2d_nativeStage.offsetLeft;
-            my = me.pageY - g2d_nativeStage.offsetTop;
+            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
+            mx = me.pageX - rect.left;//g2d_nativeStage.offsetLeft;
+            my = me.pageY - rect.top;//g2d_nativeStage.offsetTop;
 			buttonDown = me.buttons & 1 == 1;
 			ctrlKey = me.ctrlKey;
 			altKey = me.altKey;
