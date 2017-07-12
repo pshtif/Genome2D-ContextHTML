@@ -83,6 +83,10 @@ class GTriangleTextureBufferCPURenderer implements IGRenderer
 	public function new():Void {
     }
 
+    public function getProgram():Program {
+        return g2d_program;
+    }
+
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
         var shader:Shader = g2d_nativeContext.createShader(shaderType);
         g2d_nativeContext.shaderSource(shader, shaderSrc);

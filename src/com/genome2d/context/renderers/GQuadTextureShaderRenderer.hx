@@ -107,9 +107,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
     inline static private var FRAGMENT_SHADER_CODE_ALPHA:String =
     "
-			//#ifdef GL_ES
 			precision lowp float;
-			//#endif
 
 			varying vec2 vTexCoord;
 			varying vec4 vColor;
@@ -120,7 +118,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 			{
 				gl_FragColor = texture2D(sTexture, vTexCoord) * vColor;
 			}
-		";
+	";
 
     private var g2d_nativeContext:RenderingContext;
 	private var g2d_quadCount:Int = 0;
@@ -141,15 +139,37 @@ class GQuadTextureShaderRenderer implements IGRenderer
     private var g2d_context:GWebGLContext;
 
     private var g2d_initialized:Int = -1;
+    private var g2d_activeFilter:GFilter;
 
 	public var g2d_program:Dynamic;
+
+    private var g2d_cachedFilterShaders:Map<String,Shader>;
+    private var g2d_defaultFragmentShader:Shader;
+    private var g2d_previousFragmentShader:Shader;
 	
 	public function new():Void {
     }
 
-    private function getShader(shaderSrc:String, shaderType:Int):Shader {
-        var shader:Shader = g2d_nativeContext.createShader(shaderType);
-        g2d_nativeContext.shaderSource(shader, shaderSrc);
+    public function getProgram():Program {
+        return g2d_program;
+    }
+
+    private function getFilterShader(p_filter:GFilter):Shader {
+        var shader:Shader = null;
+        if (g2d_cachedFilterShaders == null) g2d_cachedFilterShaders = new Map<String,Shader>();
+        if (g2d_cachedFilterShaders.exists(p_filter.id)) {
+            shader = g2d_cachedFilterShaders.get(p_filter.id);
+        } else {
+            shader = getShader(p_filter.fragmentCode, RenderingContext.FRAGMENT_SHADER);
+            g2d_cachedFilterShaders.set(p_filter.id, shader);
+        }
+
+        return shader;
+    }
+
+    private function getShader(p_shaderSrc:String, p_shaderType:Int):Shader {
+        var shader:Shader = g2d_nativeContext.createShader(p_shaderType);
+        g2d_nativeContext.shaderSource(shader, p_shaderSrc);
         g2d_nativeContext.compileShader(shader);
 
         // Check for erros
@@ -163,13 +183,14 @@ class GQuadTextureShaderRenderer implements IGRenderer
     public function initialize(p_context:GWebGLContext):Void {
         g2d_context = p_context;
 		g2d_nativeContext = g2d_context.getNativeContext();
-		
-		var fragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
+
 		var vertexShader = getShader(VERTEX_SHADER_CODE_ALPHA, RenderingContext.VERTEX_SHADER);
+        g2d_defaultFragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
+        g2d_previousFragmentShader = g2d_defaultFragmentShader;
 
 		g2d_program = g2d_nativeContext.createProgram();
 		g2d_nativeContext.attachShader(g2d_program, vertexShader);
-		g2d_nativeContext.attachShader(g2d_program, fragmentShader);
+		g2d_nativeContext.attachShader(g2d_program, g2d_defaultFragmentShader);
 		g2d_nativeContext.linkProgram(g2d_program);
 
 		//if (!RenderingContext.getProgramParameter(program, RenderingContext.LINK_STATUS)) { ("Could not initialise shaders"); }
@@ -302,17 +323,34 @@ class GQuadTextureShaderRenderer implements IGRenderer
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
         var useAlpha:Bool = !g2d_useSeparatedAlphaPipeline && !(p_red==1 && p_green==1 && p_blue==1 && p_alpha==1);
         var notSameUseAlpha:Bool = g2d_activeAlpha != useAlpha;
+        var notSameFilter:Bool = g2d_activeFilter != p_filter;
         // TODO: Change this if we implement separate alpha pipeline
         g2d_activeAlpha = useAlpha;
 
-        if (notSameTexture) {
+        if (notSameTexture || notSameFilter) {
             if (g2d_activeNativeTexture != null) push();
 
             if (notSameTexture) {
                 g2d_activeNativeTexture = p_texture.nativeTexture;
                 g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
                 g2d_nativeContext.bindTexture(RenderingContext.TEXTURE_2D, p_texture.nativeTexture);
-                untyped g2d_nativeContext.uniform1i(g2d_program.samplerUniform, 0);
+                untyped g2d_nativeContext.uniform1i(g2d_nativeContext.getUniformLocation(g2d_program, "sTexture"), 0);
+            }
+
+            if (notSameFilter) {
+                if (g2d_activeFilter != null) g2d_activeFilter.clear(g2d_context);
+                g2d_nativeContext.detachShader(g2d_program, g2d_previousFragmentShader);
+                g2d_activeFilter = p_filter;
+                if (g2d_activeFilter != null) {
+                    g2d_previousFragmentShader = getFilterShader(g2d_activeFilter);
+                    g2d_nativeContext.attachShader(g2d_program, g2d_previousFragmentShader);
+                    g2d_nativeContext.linkProgram(g2d_program);
+                    g2d_activeFilter.bind(g2d_context, this, p_texture);
+                } else {
+                    g2d_previousFragmentShader = g2d_defaultFragmentShader;
+                    g2d_nativeContext.attachShader(g2d_program, g2d_previousFragmentShader);
+                    g2d_nativeContext.linkProgram(g2d_program);
+                }
             }
         }
 		

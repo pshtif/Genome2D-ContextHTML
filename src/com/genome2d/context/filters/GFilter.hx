@@ -8,25 +8,26 @@
  */
 package com.genome2d.context.filters;
 
-/**
+import com.genome2d.textures.GTexture;
 
-**/
 class GFilter {
-    public var g2d_id:String;
-    public var overrideFragmentShader:Bool = false;
+    public var id:String;
+    public var overrideFragmentShader:Bool = true; // Always true for JS as it doesn't support shader injecting jet
     public var fragmentCode:String = "";
+    static private var g2d_count:Int = 0;
 
     private var g2d_fragmentConstants:Array<Float>;
 
     private function new() {
-        g2d_id = Std.string(Type.getClass(this));
-        //g2d_fragmentConstants = new Vector<Float>();
-    }
-/*
-    public function bind(p_context:Context3D, p_texture:GTexture):Void {
-        p_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 1, g2d_fragmentConstants, Std.int(g2d_fragmentConstants.length/4));
+        id = untyped (g2d_count++)+"";
     }
 
-    public function clear(p_context:Context3D):Void {}
-/**/
+    public function bind(p_context:IGContext, p_renderer:IGRenderer, p_defaultTexture:GTexture):Void {
+        //if (fragmentConstants != null && fragmentConstants.length>0) p_context.getNativeContext().setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 1, fragmentConstants, untyped __int__(fragmentConstants.length/4));
+    }
+
+    /**
+        Called when filter is finished rendering
+    **/
+    public function clear(p_context:IGContext):Void {}
 }
