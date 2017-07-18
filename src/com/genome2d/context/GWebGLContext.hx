@@ -219,14 +219,14 @@ class GWebGLContext implements IGFocusable
         return g2d_activeMaskRect;
     }
     inline public function setMaskRect(p_maskRect:GRectangle):Void {
-        if (p_maskRect != g2d_activeMaskRect) {
+        if (p_maskRect != g2d_activeMaskRect || ((p_maskRect != null && g2d_activeMaskRect != null) && (p_maskRect.width != g2d_activeMaskRect.width || p_maskRect.height != g2d_activeMaskRect.height && p_maskRect.x != g2d_activeMaskRect.x || p_maskRect.y != g2d_activeMaskRect.y))) {
             if (g2d_activeRenderer != null) g2d_activeRenderer.push();
 
             if (p_maskRect == null) {
+                g2d_activeMaskRect = null;
                 g2d_nativeContext.scissor(0, 0, Std.int(g2d_activeViewRect.width), Std.int(g2d_activeViewRect.height));
-
             } else {
-                g2d_activeMaskRect = g2d_activeViewRect.intersection(p_maskRect);
+                g2d_activeMaskRect = g2d_activeViewRect.intersection(new GRectangle(p_maskRect.x + g2d_activeViewRect.x + g2d_activeViewRect.width * .5 - g2d_activeCamera.x * g2d_activeCamera.scaleX, p_maskRect.y + g2d_activeViewRect.y + g2d_activeViewRect.height * .5 - g2d_activeCamera.y * g2d_activeCamera.scaleY, p_maskRect.width, p_maskRect.height));
                 g2d_nativeContext.scissor(Std.int(g2d_activeMaskRect.x), Std.int(g2d_activeViewRect.height-g2d_activeMaskRect.y-g2d_activeMaskRect.height), Std.int(g2d_activeMaskRect.width), Std.int(g2d_activeMaskRect.height));
             }
         }
