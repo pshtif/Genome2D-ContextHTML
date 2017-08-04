@@ -383,12 +383,21 @@ class GWebGLContext implements IGFocusable
 
     }
 
+    private var g2d_nextFrameCallback:Void->Void;
+    public function callNextFrame(p_callback:Void->Void):Void {
+        g2d_nextFrameCallback = p_callback;
+    }
+
     private function g2d_enterFrameHandler():Void {
         var currentTime:Float = Date.now().getTime();
         g2d_currentDeltaTime = currentTime - g2d_currentTime;
         g2d_currentTime = currentTime;
         g2d_stats.render(this);
-
+        if (g2d_nextFrameCallback != null) {
+            var callback:Void->Void = g2d_nextFrameCallback;
+            g2d_nextFrameCallback = null;
+            callback();
+        }
         onFrame.dispatch(g2d_currentDeltaTime);
         GRequestAnimationFrame.request(g2d_enterFrameHandler);
     }
