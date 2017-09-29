@@ -184,7 +184,7 @@ class GTriangleTextureBufferCPURenderer implements IGRenderer
         while (i<dataSize) {
             // xy
             g2d_vertices[index] = cos*p_vertices[i]*p_scaleX - sin*p_vertices[i+1]*p_scaleY + p_x;
-            g2d_vertices[index+1] = sin*p_vertices[i]*p_scaleY + cos*p_vertices[i+1]*p_scaleX + p_y;
+            g2d_vertices[index+1] = sin*p_vertices[i]*p_scaleX + cos*p_vertices[i+1]*p_scaleY + p_y;
             // uv
             g2d_vertices[index+2] = ux+p_uvs[i]*usx;
             g2d_vertices[index+3] = uy+p_uvs[i+1]*usy;

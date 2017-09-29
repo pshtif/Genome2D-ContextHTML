@@ -10,6 +10,7 @@ package com.genome2d.context.renderers;
 
 import com.genome2d.context.GProjectionMatrix;
 import com.genome2d.context.IGContext;
+import com.genome2d.context.IGRenderer;
 import com.genome2d.context.GWebGLContext;
 import com.genome2d.debug.GDebug;
 import com.genome2d.geom.GFloat4;
@@ -92,6 +93,10 @@ class G3DRenderer implements IGRenderer
 		";
 
 	public var g2d_program:Program;
+
+	public function getProgram() {
+		return g2d_program;
+	}
 	
 	inline public static var STRIDE : Int = 24;
 	
@@ -156,13 +161,14 @@ class G3DRenderer implements IGRenderer
 		g2d_initialized = p_reinitialize;
 		
 		g2d_nativeContext.useProgram(g2d_program);
+		p_context.setDepthTest(true, GDepthFunc.LESS);
     }
 	
 	@:access(com.genome2d.context.GWebGLContext)
 	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
 		if (p_cull == 2) g2d_nativeContext.cullFace(RenderingContext.FRONT);
         else if (p_cull == 1) g2d_nativeContext.cullFace(RenderingContext.BACK);
-        //else g2d_nativeContext.cullFace(RenderingContext.);
+        ////else g2d_nativeContext.cullFace(RenderingContext.);
 		
 		if (projectionMatrix != null) {
 			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  projectionMatrix.rawData);
