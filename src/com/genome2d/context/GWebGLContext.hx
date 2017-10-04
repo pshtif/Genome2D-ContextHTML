@@ -185,6 +185,8 @@ class GWebGLContext implements IGFocusable
 		
 		g2d_defaultCamera.x = g2d_stageViewRect.width/2;
         g2d_defaultCamera.y = g2d_stageViewRect.height/2;
+
+        onResize.dispatch(Std.int(g2d_stageViewRect.width), Std.int(g2d_stageViewRect.height));
 	}
 
     public function setActiveCamera(p_camera:GCamera):Bool {
