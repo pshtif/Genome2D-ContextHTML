@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import js.html.WheelEvent;
 import js.html.DOMRect;
 import com.genome2d.context.renderers.GTriangleTextureBufferCPURenderer;
 import com.genome2d.context.renderers.GMatrixQuadTextureShaderRenderer;
@@ -159,6 +160,7 @@ class GWebGLContext implements IGFocusable
         g2d_nativeStage.addEventListener("mousedown", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mouseup", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mousemove", g2d_mouseEventHandler);
+        g2d_nativeStage.addEventListener("wheel", g2d_mouseEventHandler);
 
 		g2d_nativeStage.addEventListener("touchstart", g2d_mouseEventHandler);
 		g2d_nativeStage.addEventListener("touchend", g2d_mouseEventHandler);
@@ -412,7 +414,18 @@ class GWebGLContext implements IGFocusable
 		var ctrlKey:Bool = false;
 		var altKey:Bool = false;
 		var shiftKey:Bool = false;
-        if (Std.is(event,MouseEvent)) {
+        var delta:Float = 0;
+        if (Std.is(event,WheelEvent)) {
+            var we:WheelEvent = cast event;
+            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
+            mx = we.pageX - rect.left;//g2d_nativeStage.offsetLeft;
+            my = we.pageY - rect.top;//g2d_nativeStage.offsetTop;
+            buttonDown = we.buttons & 1 == 1;
+            ctrlKey = we.ctrlKey;
+            altKey = we.altKey;
+            shiftKey = we.shiftKey;
+            delta = we.deltaY;
+        } else if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             mx = me.pageX - rect.left;//g2d_nativeStage.offsetLeft;
