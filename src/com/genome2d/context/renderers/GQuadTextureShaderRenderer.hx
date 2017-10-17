@@ -153,7 +153,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
     }
 
     public function getProgram():Program {
-        return g2d_defaultProgram;
+        return g2d_currentProgram;
     }
 
     private function getFilterProgram(p_filter:GFilter):Program {

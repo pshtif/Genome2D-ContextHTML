@@ -8,6 +8,7 @@
  */
 package com.genome2d.context.filters;
 
+import js.html.Float32Array;
 import com.genome2d.textures.GTexture;
 
 class GFilter {
