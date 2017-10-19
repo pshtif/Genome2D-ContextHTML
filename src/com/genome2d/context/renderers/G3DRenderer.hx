@@ -38,10 +38,12 @@ class G3DRenderer implements IGRenderer
 	private var g2d_indexBuffer:Buffer;
 	private var g2d_vertexBuffer:Buffer;
 	private var g2d_uvBuffer:Buffer;
+	private var g2d_normalBuffer:Buffer;
 	
 	private var g2d_indices:Uint16Array;
     private var g2d_vertices:Float32Array;
 	private var g2d_uvs:Float32Array;
+	private var g2d_normals:Float32Array;
 
     private var g2d_activeNativeTexture:Texture;
 	private var g2d_initialized:Int = -1;
@@ -74,6 +76,32 @@ class G3DRenderer implements IGRenderer
 			}
 		";
 
+	inline static private var VERTEX_SHADER_CODE_NORMAL:String =
+	"
+			uniform mat4 projectionMatrix;
+			uniform mat4 cameraMatrix;
+			uniform mat4 modelMatrix;
+			uniform mat4 invertedMatrix;
+
+			attribute vec3 aPosition;
+			attribute vec2 aUv;
+			attribute vec3 aNormal;
+
+			varying vec2 vUv;
+			varying vec3 vNormal;
+
+			void main(void)
+			{
+				vUv = aUv;
+
+				vNormal = normalize(vec4(aNormal.x, aNormal.y, aNormal.z, 1) * invertedMatrix).xyz;
+
+				gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, 1) * modelMatrix;
+				gl_Position = gl_Position * cameraMatrix;
+				gl_Position = gl_Position * projectionMatrix;
+			}
+		";
+
 	inline static private var FRAGMENT_SHADER_CODE:String =
             "
 			#ifdef GL_ES
@@ -86,8 +114,32 @@ class G3DRenderer implements IGRenderer
 
 			void main(void)
 			{
-				vec4 texColor;
-				texColor = texture2D(sTexture, vUv);
+				gl_FragColor = texture2D(sTexture, vUv);
+			}
+		";
+
+	inline static private var FRAGMENT_SHADER_CODE_NORMAL:String =
+	"
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+
+			varying vec2 vUv;
+			varying vec3 vNormal;
+
+			uniform sampler2D sTexture;
+
+			uniform vec3 lightDirection;
+			uniform vec3 ambientColor;
+
+			void main(void)
+			{
+				vec4 texColor = texture2D(sTexture, vUv);
+
+				float light = -dot(vNormal, lightDirection);
+				light = clamp(light, 0.2, 1.0);
+				texColor.xyz = texColor.xyz * light;
+
 				gl_FragColor = texColor;
 			}
 		";
@@ -106,12 +158,16 @@ class G3DRenderer implements IGRenderer
 		
 		g2d_uvs = new Float32Array(p_uvs.length);
 		for (i in 0...p_uvs.length) g2d_uvs[i] = p_uvs[i];
+
+		g2d_normals = new Float32Array(p_normals.length);
+		for (i in 0...p_normals.length) g2d_normals[i] = p_normals[i];
 		
 		g2d_indices = new Uint16Array(p_indices.length);
 		for (i in 0...p_indices.length) g2d_indices[i] = p_indices[i];
 		
 		modelMatrix = new GMatrix3D();
 		cameraMatrix = new GMatrix3D();
+		lightDirection = new GFloat4();
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -130,8 +186,8 @@ class G3DRenderer implements IGRenderer
 		g2d_context = p_context;
 		g2d_nativeContext = g2d_context.getNativeContext();
 		
-		var fragmentShader = getShader(FRAGMENT_SHADER_CODE, RenderingContext.FRAGMENT_SHADER);
-		var vertexShader = getShader(VERTEX_SHADER_CODE, RenderingContext.VERTEX_SHADER);
+		var fragmentShader = getShader(FRAGMENT_SHADER_CODE_NORMAL, RenderingContext.FRAGMENT_SHADER);
+		var vertexShader = getShader(VERTEX_SHADER_CODE_NORMAL, RenderingContext.VERTEX_SHADER);
 
 		g2d_program = g2d_nativeContext.createProgram();
 		g2d_nativeContext.attachShader(g2d_program, vertexShader);
@@ -147,12 +203,16 @@ class G3DRenderer implements IGRenderer
 		
 		untyped g2d_program.uvAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aUv");
 		untyped g2d_nativeContext.enableVertexAttribArray(g2d_program.uvAttribute);
+
+		untyped g2d_program.normalAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aNormal");
+		untyped g2d_nativeContext.enableVertexAttribArray(g2d_program.normalAttribute);
 		
 		untyped g2d_program.samplerUniform = g2d_nativeContext.getUniformLocation(g2d_program, "sTexture");
 		
 		g2d_indexBuffer = g2d_nativeContext.createBuffer();
         g2d_vertexBuffer = g2d_nativeContext.createBuffer();
 		g2d_uvBuffer = g2d_nativeContext.createBuffer();
+		g2d_normalBuffer = g2d_nativeContext.createBuffer();
 	}
 
 	@:access(com.genome2d.context.GWebGLContext)
@@ -183,6 +243,13 @@ class G3DRenderer implements IGRenderer
 		transposedMatrix = cameraMatrix.clone();
 		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "cameraMatrix"), false,  transposedMatrix.rawData);
+		var transposedMatrix:GMatrix3D = modelMatrix.clone();
+		transposedMatrix.invert();
+		transposedMatrix.transpose();
+		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "invertedMatrix"), false,  transposedMatrix.rawData);
+
+		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "lightDirection"), lightDirection.x, lightDirection.y, lightDirection.z);
+		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "ambientColor"), .1, .1, .1);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
@@ -196,6 +263,10 @@ class G3DRenderer implements IGRenderer
 		g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_uvBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, g2d_uvs, RenderingContext.STREAM_DRAW);
 		untyped g2d_nativeContext.vertexAttribPointer(g2d_program.uvAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
+
+		g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_normalBuffer);
+		g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, g2d_normals, RenderingContext.STREAM_DRAW);
+		untyped g2d_nativeContext.vertexAttribPointer(g2d_program.normalAttribute, 3, RenderingContext.FLOAT, false, 0, 0);
 		
 		g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indices, RenderingContext.STATIC_DRAW);
@@ -215,6 +286,7 @@ class G3DRenderer implements IGRenderer
 		g2d_nativeContext.deleteBuffer(g2d_indexBuffer);
 		g2d_nativeContext.deleteBuffer(g2d_vertexBuffer);
 		g2d_nativeContext.deleteBuffer(g2d_uvBuffer);
+		g2d_nativeContext.deleteBuffer(g2d_normalBuffer);
 		
 		g2d_nativeContext.deleteProgram(g2d_program);
 	}
