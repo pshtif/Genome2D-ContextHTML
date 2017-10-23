@@ -27,4 +27,25 @@ class GVector3D {
         z = p_z;
 		w = p_w;
     }
+
+	public function add(p_vector:GVector3D):GVector3D {
+
+		return new GVector3D(x + p_vector.x,
+		y + p_vector.y,
+		z + p_vector.z);
+	}
+
+	public function subtract(p_vector:GVector3D):GVector3D {
+
+		return new GVector3D(x - p_vector.x,
+		y - p_vector.y,
+		z - p_vector.z);
+	}
+
+	public function scaleBy(p_s:Float) {
+
+		x = x * p_s;
+		y = y * p_s;
+		z = z * p_s;
+	}
 }
