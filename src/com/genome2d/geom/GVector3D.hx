@@ -51,7 +51,7 @@ class GVector3D {
 
 	public function normalize()
 	{
-		var nf:Float = 1 / Math.sqrt(x  x + y  y + z * z);
+		var nf:Float = 1 / Math.sqrt(x * x + y * y + z * z);
 		x = x * nf;
 		y = y * nf;
 		z = z * nf;
