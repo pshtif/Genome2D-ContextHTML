@@ -1,6 +1,6 @@
 package com.genome2d.assets;
-import js.html.compat.DataView;
-import js.html.compat.ArrayBuffer;
+import com.genome2d.debug.GDebug;
+import js.html.ArrayBuffer;
 import com.genome2d.macros.MGDebug;
 import js.html.XMLHttpRequestResponseType;
 import js.html.XMLHttpRequest;
