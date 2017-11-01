@@ -8,6 +8,7 @@
  */
 package com.genome2d.textures;
 
+import js.html.ImageData;
 import com.genome2d.debug.GDebug;
 import com.genome2d.context.IGContext;
 import com.genome2d.geom.GRectangle;
@@ -38,6 +39,12 @@ class GTexture extends GTextureBase
                 g2d_nativeWidth = imageElement.width;
                 g2d_nativeHeight = imageElement.height;
                 premultiplied = true;
+			} else if (Std.is(g2d_source, ImageData)) {
+				var imageData:ImageData = cast g2d_source;
+				g2d_sourceType = GTextureSourceType.IMAGEDATA;
+				g2d_nativeWidth = imageData.width;
+				g2d_nativeHeight = imageData.height;
+				premultiplied = true;
             } else if (Std.is(g2d_source,GRectangle)) {
                 g2d_sourceType = GTextureSourceType.RENDER_TARGET;
                 g2d_nativeWidth = p_value.width;
@@ -70,7 +77,7 @@ class GTexture extends GTextureBase
                 g2d_gpuHeight = usesRectangle() ? g2d_nativeHeight : GTextureUtils.getNextValidTextureSize(g2d_nativeHeight);
 				
 				switch (g2d_sourceType) {
-					case GTextureSourceType.IMAGE:
+					case GTextureSourceType.IMAGE | GTextureSourceType.IMAGEDATA:
 						if (nativeTexture == null || p_reinitialize) {
 							g2d_nativeTexture = nativeContext.createTexture();
 						}
