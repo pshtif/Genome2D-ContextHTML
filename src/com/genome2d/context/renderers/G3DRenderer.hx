@@ -96,7 +96,8 @@ class G3DRenderer implements IGRenderer
 
 				vNormal = normalize(vec4(aNormal.x, aNormal.y, aNormal.z, 1) * invertedMatrix).xyz;
 
-				gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, 1) * modelMatrix;
+				gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, 1);
+				gl_Position = gl_Position * modelMatrix;
 				gl_Position = gl_Position * cameraMatrix;
 				gl_Position = gl_Position * projectionMatrix;
 			}
@@ -154,6 +155,7 @@ class G3DRenderer implements IGRenderer
 	
 	public function new(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>, p_normals:Array<Float>, p_generatePerspectiveMatrix:Bool = false):Void {
 		g2d_vertices = new Float32Array(p_vertices.length);
+
 		for (i in 0...p_vertices.length) g2d_vertices[i] = p_vertices[i];
 		
 		g2d_uvs = new Float32Array(p_uvs.length);
@@ -222,13 +224,13 @@ class G3DRenderer implements IGRenderer
 		
 		g2d_nativeContext.useProgram(g2d_program);
 		p_context.setDepthTest(true, GDepthFunc.LESS);
+		g2d_nativeContext.enable(RenderingContext.CULL_FACE);
     }
 	
 	@:access(com.genome2d.context.GWebGLContext)
 	public function draw(p_cull:Int = 0, p_renderType:Int):Void {
-		if (p_cull == 2) g2d_nativeContext.cullFace(RenderingContext.FRONT);
-        else if (p_cull == 1) g2d_nativeContext.cullFace(RenderingContext.BACK);
-        ////else g2d_nativeContext.cullFace(RenderingContext.);
+		if (p_cull == 2) g2d_nativeContext.cullFace(RenderingContext.BACK);
+        else if (p_cull == 1) g2d_nativeContext.cullFace(RenderingContext.FRONT);
 		
 		if (projectionMatrix != null) {
 			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  projectionMatrix.rawData);
@@ -280,6 +282,10 @@ class G3DRenderer implements IGRenderer
 
     public function clear():Void {
         g2d_activeNativeTexture = null;
+
+		g2d_context.setDepthTest(false, GDepthFunc.ALWAYS);
+		g2d_nativeContext.cullFace(RenderingContext.NONE);
+		g2d_nativeContext.disable(RenderingContext.CULL_FACE);
     }
 	
 	public function dispose():Void {
