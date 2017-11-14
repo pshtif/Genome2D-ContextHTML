@@ -131,6 +131,7 @@ class G3DRenderer implements IGRenderer
 			uniform sampler2D sTexture;
 
 			uniform vec3 lightDirection;
+			uniform vec3 lightColor;
 			uniform vec3 ambientColor;
 
 			void main(void)
@@ -139,10 +140,11 @@ class G3DRenderer implements IGRenderer
 
 				float light = -dot(vNormal, lightDirection);
 				light = clamp(light, 0.0, 1.0);
-				vec3 ambientColor = texColor.xyz * ambientColor.xyz;
-				texColor.xyz = texColor.xyz * light;
-				texColor.xyz = texColor.xyz + ambientColor;
 
+				vec3 directionColor = texColor.xyz * light * lightColor;
+				vec3 ambientColor = texColor.xyz * ambientColor.xyz;
+
+				texColor.xyz = directionColor + ambientColor;
 				gl_FragColor = texColor;
 			}
 		";
@@ -252,6 +254,7 @@ class G3DRenderer implements IGRenderer
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "invertedMatrix"), false,  transposedMatrix.rawData);
 
 		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "lightDirection"), lightDirection.x, lightDirection.y, lightDirection.z);
+		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "lightColor"), lightColor.x, lightColor.y, lightColor.z);
 		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "ambientColor"), ambientColor.x, ambientColor.y, ambientColor.z);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
