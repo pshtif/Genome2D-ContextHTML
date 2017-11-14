@@ -138,8 +138,10 @@ class G3DRenderer implements IGRenderer
 				vec4 texColor = texture2D(sTexture, vUv);
 
 				float light = -dot(vNormal, lightDirection);
-				light = clamp(light, 0.2, 1.0);
+				light = clamp(light, 0.0, 1.0);
+				vec3 ambientColor = texColor.xyz * ambientColor.xyz;
 				texColor.xyz = texColor.xyz * light;
+				texColor.xyz = texColor.xyz + ambientColor;
 
 				gl_FragColor = texColor;
 			}
@@ -247,11 +249,10 @@ class G3DRenderer implements IGRenderer
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "cameraMatrix"), false,  transposedMatrix.rawData);
 		var transposedMatrix:GMatrix3D = modelMatrix.clone();
 		transposedMatrix.invert();
-		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "invertedMatrix"), false,  transposedMatrix.rawData);
 
 		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "lightDirection"), lightDirection.x, lightDirection.y, lightDirection.z);
-		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "ambientColor"), .1, .1, .1);
+		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "ambientColor"), ambientColor.x, ambientColor.y, ambientColor.z);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
@@ -284,7 +285,6 @@ class G3DRenderer implements IGRenderer
         g2d_activeNativeTexture = null;
 
 		g2d_context.setDepthTest(false, GDepthFunc.ALWAYS);
-		g2d_nativeContext.cullFace(RenderingContext.NONE);
 		g2d_nativeContext.disable(RenderingContext.CULL_FACE);
     }
 	
