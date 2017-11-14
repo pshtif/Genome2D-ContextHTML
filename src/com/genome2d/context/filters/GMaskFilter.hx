@@ -1,7 +1,9 @@
 package com.genome2d.context.filters;
+
 import js.html.webgl.Program;
 import js.html.webgl.RenderingContext;
 import com.genome2d.textures.GTexture;
+
 class GMaskFilter extends GFilter {
 
     public var maskTexture:GTexture;
