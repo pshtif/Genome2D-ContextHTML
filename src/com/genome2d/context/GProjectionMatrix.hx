@@ -18,10 +18,10 @@ class GProjectionMatrix extends GMatrix3D
 
     public function new(p_raw:Array<Float> = null) {
 		super(p_raw);
-        rawData =  new Float32Array([2.0, 0.0, 0.0, 0.0,
-									0.0, -2.0, 0.0, 0.0,
-									0.0, 0.0, -1/(FAR-NEAR), 0,
-									-1.0, 1.0, -NEAR/(FAR-NEAR), 1.0
+        rawData =  new Float32Array([2.0 , 0.0  , 0.0           , 0.0,
+									0.0  , -2.0 , 0.0           , 0.0,
+									0.0  , 0.0  , 1/(FAR-NEAR) , -NEAR/(FAR-NEAR),
+									-1.0 , 1.0  , 0             , 1.0
 									]);
     }
 
@@ -53,10 +53,10 @@ class GProjectionMatrix extends GMatrix3D
     }
 
     public function perspective(p_width:Float, p_height:Float, zNear:Float, zFar:Float):GProjectionMatrix {
-        rawData =  new Float32Array([2/p_width, 0.0, 0.0, 0.0,
-										 0.0, -2/p_height, 0.0, 0.0,
-										 0, 0, zFar/(zFar-zNear), 1.0,
-										 0, 0, (zNear*zFar)/(zNear-zFar), 0
+        rawData =  new Float32Array([2/p_width , 0.0         , 0.0                       , 0.0,
+                                     0.0       , -2/p_height , 0.0                       , 0.0,
+                                     0         , 0           , zFar/(zFar-zNear)         , 1.0,
+									 0         , 0           , (zNear*zFar)/(zNear-zFar) , 0
 										]);
         return this;
     }
