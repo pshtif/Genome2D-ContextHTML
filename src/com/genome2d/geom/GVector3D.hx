@@ -3,7 +3,7 @@ package com.genome2d.geom;
 class GVector3D {
 	static public var X_AXIS(get, null):GVector3D;
 	inline static private function get_X_AXIS ():GVector3D {
-		return new GVector3D (-1, 0, 0);
+		return new GVector3D (1, 0, 0);
 	}
 	
 	static public var Y_AXIS (get, null):GVector3D;	
