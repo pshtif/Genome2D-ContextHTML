@@ -76,6 +76,22 @@ class G3DRenderer implements IGRenderer
 			}
 		";
 
+	inline static private var FRAGMENT_SHADER_CODE:String =
+	"
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+
+			varying vec2 vUv;
+
+			uniform sampler2D sTexture;
+
+			void main(void)
+			{
+				gl_FragColor = texture2D(sTexture, vUv);
+			}
+		";
+
 	inline static private var VERTEX_SHADER_CODE_NORMAL:String =
 	"
 			uniform mat4 projectionMatrix;
@@ -94,28 +110,13 @@ class G3DRenderer implements IGRenderer
 			{
 				vUv = aUv;
 
-				vNormal = normalize(vec4(aNormal.x, aNormal.y, aNormal.z, 1) * invertedMatrix).xyz;
+				vNormal = vec4(aNormal.x, aNormal.y, aNormal.z, 1) * invertedMatrix).xyz;
+				vNormal = normalize(vNormal);
 
 				gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, 1);
 				gl_Position = gl_Position * modelMatrix;
 				gl_Position = gl_Position * cameraMatrix;
 				gl_Position = gl_Position * projectionMatrix;
-			}
-		";
-
-	inline static private var FRAGMENT_SHADER_CODE:String =
-            "
-			#ifdef GL_ES
-			precision highp float;
-			#endif
-
-			varying vec2 vUv;
-
-			uniform sampler2D sTexture;
-
-			void main(void)
-			{
-				gl_FragColor = texture2D(sTexture, vUv);
 			}
 		";
 
@@ -249,7 +250,7 @@ class G3DRenderer implements IGRenderer
 		transposedMatrix = cameraMatrix.clone();
 		transposedMatrix.transpose();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "cameraMatrix"), false,  transposedMatrix.rawData);
-		var transposedMatrix:GMatrix3D = modelMatrix.clone();
+		transposedMatrix = modelMatrix.clone();
 		transposedMatrix.invert();
 		g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "invertedMatrix"), false,  transposedMatrix.rawData);
 
