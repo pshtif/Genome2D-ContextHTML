@@ -110,7 +110,7 @@ class G3DRenderer implements IGRenderer
 			{
 				vUv = aUv;
 
-				vNormal = vec4(aNormal.x, aNormal.y, aNormal.z, 1) * invertedMatrix).xyz;
+				vNormal = (vec4(aNormal.x, aNormal.y, aNormal.z, 1) * invertedMatrix).xyz;
 				vNormal = normalize(vNormal);
 
 				gl_Position = vec4(aPosition.x, aPosition.y, aPosition.z, 1);
