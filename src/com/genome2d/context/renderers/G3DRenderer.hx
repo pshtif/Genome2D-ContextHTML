@@ -49,9 +49,9 @@ class G3DRenderer implements IGRenderer
 	private var g2d_initialized:Int = -1;
 	
 	public var lightDirection:GFloat4;
+	public var lightColor:GFloat4;
     public var ambientColor:GFloat4;
     public var tintColor:GFloat4;
-    public var lightColor:GFloat4;
 	
 	public var texture:GTexture;
 
@@ -134,6 +134,7 @@ class G3DRenderer implements IGRenderer
 			uniform vec3 lightDirection;
 			uniform vec3 lightColor;
 			uniform vec3 ambientColor;
+			uniform vec4 tintColor;
 
 			void main(void)
 			{
@@ -146,7 +147,7 @@ class G3DRenderer implements IGRenderer
 				vec3 ambientColor = texColor.xyz * ambientColor.xyz;
 
 				texColor.xyz = directionColor + ambientColor;
-				gl_FragColor = texColor;
+				gl_FragColor = tintColor * texColor;
 			}
 		";
 
@@ -257,6 +258,7 @@ class G3DRenderer implements IGRenderer
 		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "lightDirection"), lightDirection.x, lightDirection.y, lightDirection.z);
 		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "lightColor"), lightColor.x, lightColor.y, lightColor.z);
 		g2d_nativeContext.uniform3f(g2d_nativeContext.getUniformLocation(g2d_program, "ambientColor"), ambientColor.x, ambientColor.y, ambientColor.z);
+		g2d_nativeContext.uniform4f(g2d_nativeContext.getUniformLocation(g2d_program, "tintColor"), tintColor.x * tintColor.w, tintColor.y * tintColor.w, tintColor.z * tintColor.w, tintColor.w);
 		
 		g2d_activeNativeTexture = texture.nativeTexture;
 		g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
