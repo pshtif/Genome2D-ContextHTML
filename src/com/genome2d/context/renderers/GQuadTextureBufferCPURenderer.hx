@@ -8,6 +8,7 @@
  */
 package com.genome2d.context.renderers;
 
+import com.genome2d.textures.GTexture;
 import com.genome2d.debug.GDebug;
 import js.html.webgl.Texture;
 import js.html.webgl.Shader;
@@ -15,11 +16,11 @@ import js.html.webgl.Program;
 import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
-import com.genome2d.textures.GContextTexture;
 import js.html.Float32Array;
 
 class GQuadTextureBufferCPURenderer
 {
+    /*
     private var g2d_nativeContext:RenderingContext;
 	private var g2d_quadCount:Int = 0;
 	
@@ -111,7 +112,7 @@ class GQuadTextureBufferCPURenderer
         g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  p_projection);
     }
 	
-	public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_texture:GContextTexture):Void {
+	public function draw(p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_texture:GTexture):Void {
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
 
         if (notSameTexture) {
@@ -195,4 +196,5 @@ class GQuadTextureBufferCPURenderer
     public function clear():Void {
         g2d_activeNativeTexture = null;
     }
+    /**/
 }
