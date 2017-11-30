@@ -43,8 +43,15 @@ import com.genome2d.input.GMouseInputType;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.context.renderers.GQuadTextureShaderRenderer;
 
+#if webglonly
 @:native("com.genome2d.context.IGContext")
-class GWebGLContext implements IGFocusable
+#end
+class GWebGLContext
+#if !webglonly
+implements IGContext
+#else
+implements IGFocusable
+#end
 {
     public function hasFeature(p_feature:Int):Bool {
         switch (p_feature) {
