@@ -220,6 +220,7 @@ class GCanvasContext implements IGContext
 		g2d_nativeContext.restore();
 	}
 
+    @:access(com.genome2d.textures.GTexture)
     public function drawSource(p_texture:GTexture, p_blendMode:GBlendMode, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float = 1, p_scaleY:Float = 1, p_rotation:Float = 0, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float = 1, p_filter:GFilter = null):Void {
         g2d_nativeContext.save();
 
@@ -233,6 +234,7 @@ class GCanvasContext implements IGContext
         g2d_nativeContext.restore();
     }
 
+    @:access(com.genome2d.textures.GTexture)
     public function drawMatrix(p_texture:GTexture, p_blendMode:GBlendMode, p_a:Float, p_b:Float, p_c:Float, p_d:Float, p_tx:Float, p_ty:Float, p_red:Float = 1, p_green:Float = 1, p_blue:Float = 1, p_alpha:Float=1, p_filter:GFilter = null):Void {
         g2d_nativeContext.save();
 
@@ -260,7 +262,7 @@ class GCanvasContext implements IGContext
             g2d_activeBlendMode = p_blendMode;
             switch (g2d_activeBlendMode) {
                 case GBlendMode.MULTIPLY:
-                    g2d_nativeContext.globalCompositeOperation = "multiply"
+                    g2d_nativeContext.globalCompositeOperation = "multiply";
                 case GBlendMode.SCREEN:
                     g2d_nativeContext.globalCompositeOperation = "screen";
                 case GBlendMode.ADD:
