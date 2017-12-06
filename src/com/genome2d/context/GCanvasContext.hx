@@ -215,7 +215,7 @@ class GCanvasContext implements IGContext
 		var w:Float = p_texture.width;
 		var h:Float = p_texture.height;
 
-		g2d_nativeContext.drawImage(p_texture.g2d_source, p_texture.g2d_region.x, p_texture.g2d_region.y, p_texture.g2d_region.width, p_texture.g2d_region.height, -p_texture.pivotX - w / 2, -p_texture.pivotY - h / 2, w, h);
+		g2d_nativeContext.drawImage(p_texture.getImage(), p_texture.g2d_region.x, p_texture.g2d_region.y, p_texture.g2d_region.width, p_texture.g2d_region.height, -p_texture.pivotX - w / 2, -p_texture.pivotY - h / 2, w, h);
 
 		g2d_nativeContext.restore();
 	}
@@ -229,7 +229,7 @@ class GCanvasContext implements IGContext
         g2d_nativeContext.scale(p_scaleX, p_scaleY);
         g2d_nativeContext.rotate(p_rotation);
 
-        g2d_nativeContext.drawImage(p_texture.g2d_source, p_sourceX, p_sourceY, p_sourceWidth, p_sourceHeight, p_sourcePivotX, p_sourcePivotY, p_sourceWidth, p_sourceHeight);
+        g2d_nativeContext.drawImage(p_texture.getImage(), p_sourceX, p_sourceY, p_sourceWidth, p_sourceHeight, p_sourcePivotX, p_sourcePivotY, p_sourceWidth, p_sourceHeight);
 
         g2d_nativeContext.restore();
     }
@@ -243,7 +243,7 @@ class GCanvasContext implements IGContext
         var w:Float = p_texture.width;
         var h:Float = p_texture.height;
 
-        g2d_nativeContext.drawImage(p_texture.g2d_source, p_texture.g2d_region.x, p_texture.g2d_region.y, p_texture.g2d_region.width, p_texture.g2d_region.height, -p_texture.pivotX - w / 2, -p_texture.pivotY - h / 2, w, h);
+        g2d_nativeContext.drawImage(p_texture.getImage(), p_texture.g2d_region.x, p_texture.g2d_region.y, p_texture.g2d_region.width, p_texture.g2d_region.height, -p_texture.pivotX - w / 2, -p_texture.pivotY - h / 2, w, h);
 
         g2d_nativeContext.restore();
     }

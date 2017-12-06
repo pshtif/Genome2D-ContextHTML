@@ -28,7 +28,16 @@ class GTexture extends GTextureBase
 	public function getFrameBuffer():Framebuffer {
 		return g2d_frameBuffer;
 	}
-	
+
+	#if !webglonly
+	public function getImage():Dynamic {
+		if (g2d_sourceType == GTextureSourceType.TEXTURE) {
+			return cast (g2d_source,GTexture).getImage();
+		}
+		return g2d_source;
+	}
+	#end
+
 	override public function setSource(p_value:Dynamic):Dynamic {
         if (g2d_source != p_value) {
             g2d_dirty = true;
