@@ -459,7 +459,7 @@ implements IGFocusable
         input.ctrlKey = ctrlKey;
         input.altKey = altKey;
         input.shiftKey = shiftKey;
-        input.delta = Std.int(delta);
+        input.delta = -Std.int(delta);
 		input.nativeCaptured = captured;
 		
         onMouseInput.dispatch(input);
