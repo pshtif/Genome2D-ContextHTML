@@ -33,7 +33,7 @@ class GContextConfig
 	public var enableErrorChecking:Bool = false;
 	public var antiAliasing:Int = 0;
 	
-    public function new(?p_stage:CanvasElement, ?p_viewRect:GRectangle = null) {
+    public function new(?p_stage:CanvasElement, ?p_viewRect:GRectangle = null, ?p_useClientSize:Bool = false) {
 		nativeStage = (p_stage == null) ? cast Browser.document.getElementById("canvas") : p_stage;
 
 		viewRect = p_viewRect;
@@ -48,6 +48,10 @@ class GContextConfig
             Browser.document.body.appendChild(nativeStage);
         } else {
             if (viewRect == null) {
+                if (p_useClientSize) {
+                    nativeStage.width = nativeStage.clientWidth;
+                    nativeStage.height = nativeStage.clientHeight;
+                }
                 viewRect = new GRectangle(0,0,nativeStage.width,nativeStage.height);
             }
         }
