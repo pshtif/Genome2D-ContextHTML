@@ -434,6 +434,9 @@ implements IGFocusable
             altKey = we.altKey;
             shiftKey = we.shiftKey;
             delta = we.deltaY;
+            if (we.deltaMode != 1) {
+                delta = 3*delta/Math.abs(delta);
+            }
         } else if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
