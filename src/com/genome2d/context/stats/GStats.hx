@@ -35,19 +35,23 @@ class GStats implements IGStats
     private var g2d_previousTime:Float = 0;
     private var g2d_fpsText:DivElement;
 
-    private var g2d_container:DivElement;
+    private var g2d_container:Element;
     private var g2d_fpsDiv:DivElement;
 
     public function new(p_canvas:Element) {
         g2d_previousTime = Date.now().getTime();
         fps = 0;
 
-        g2d_container = Browser.document.createDivElement();
-        g2d_container.id = 'stats';
-        g2d_container.style.cssText = 'width:'+p_canvas.clientWidth+'px;opacity:0.9;cursor:pointer';
-        g2d_container.style.position = "absolute";
-        g2d_container.style.left = p_canvas.offsetLeft+'px';
-        g2d_container.style.top = p_canvas.offsetTop+'px';
+        g2d_container = Browser.document.getElementById('stats');
+        if (g2d_container == null) {
+
+            g2d_container = Browser.document.createDivElement();
+            g2d_container.id = 'stats';
+            g2d_container.style.cssText = 'width:'+p_canvas.clientWidth+'px;opacity:0.9;cursor:pointer';
+            g2d_container.style.position = "absolute";
+            g2d_container.style.left = p_canvas.offsetLeft+'px';
+            g2d_container.style.top = p_canvas.offsetTop+'px';
+        }
 
         g2d_fpsDiv = Browser.document.createDivElement();
         g2d_fpsDiv.id = 'fps';
