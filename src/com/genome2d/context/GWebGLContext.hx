@@ -123,6 +123,8 @@ implements IGFocusable
     public var onMouseInput(default,null):GCallback1<GMouseInput>;
     public var onKeyboardInput(default, null):GCallback1<GKeyboardInput>;
 
+    public var preventDefaultKeyboard:Bool = true;
+
     private var g2d_lastMouseButtonsDown:Int = 0;
     public var g2d_onMouseInputInternal:GMouseInput->Void;
 
@@ -495,8 +497,10 @@ implements IGFocusable
     }
 
     private function g2d_keyboardEventHandler(event:Event):Void {
-        event.preventDefault();
-        event.stopPropagation();
+        if (preventDefaultKeyboard) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
 
         var keyEvent:KeyboardEvent = cast event;
 
