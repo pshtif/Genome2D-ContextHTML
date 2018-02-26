@@ -228,8 +228,7 @@ class GCanvasContext implements IGContext
         g2d_nativeContext.translate(p_x/g2d_activeCamera.scaleX, p_y/g2d_activeCamera.scaleY);
         g2d_nativeContext.scale(p_scaleX, p_scaleY);
         g2d_nativeContext.rotate(p_rotation);
-
-        g2d_nativeContext.drawImage(p_texture.getImage(), p_sourceX, p_sourceY, p_sourceWidth, p_sourceHeight, p_sourcePivotX, p_sourcePivotY, p_sourceWidth, p_sourceHeight);
+        g2d_nativeContext.drawImage(p_texture.getImage(), p_sourceX, p_sourceY, p_sourceWidth, p_sourceHeight, 0, 0, p_sourceWidth, p_sourceHeight);
 
         g2d_nativeContext.restore();
     }
