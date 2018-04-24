@@ -147,6 +147,8 @@ class GTexture extends GTextureBase
 			}
 		} else {
 			//g2d_nativeImage = cast g2d_nativeSource;
+			g2d_gpuWidth = g2d_nativeWidth;
+			g2d_gpuHeight = g2d_nativeHeight;
 		}
     }
 
