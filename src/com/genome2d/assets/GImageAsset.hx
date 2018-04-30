@@ -34,6 +34,7 @@ class GImageAsset extends GAsset
 
     override public function load():Void {
 		g2d_imageElement = Browser.document.createImageElement();
+        g2d_imageElement.crossOrigin = "Anonymous";
         g2d_imageElement.onerror = error_handler;
 		g2d_imageElement.onload = loaded_handler;
 		g2d_imageElement.src = g2d_url;

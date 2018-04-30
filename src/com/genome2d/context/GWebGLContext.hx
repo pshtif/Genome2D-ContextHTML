@@ -467,8 +467,34 @@ implements IGFocusable
 
         } else {
             var te:TouchEvent = cast event;
-            mx = te.targetTouches[0].pageX;
-            my = te.targetTouches[0].pageY;
+
+            // For the touchstart event, it is a list of the touch points that became active with the current event.
+            // For the touchmove event, it is a list of the touch points that have changed since the last event.
+            // For the touchend event, it is a list of the touch points that have been removed from the surface (that is, the set of touch points corresponding to fingers no longer touching the surface).
+            if (te.targetTouches != null && te.targetTouches.length > 0) {
+                mx = te.targetTouches[0].pageX;
+                my = te.targetTouches[0].pageY;
+            } else if (te.changedTouches != null && te.changedTouches.length > 0) {
+                mx = te.changedTouches[0].pageX;
+                my = te.changedTouches[0].pageY;
+            } else {
+                mx = 0;
+                my = 0;
+            }
+
+            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
+            mx = mx - rect.left;//g2d_nativeStage.offsetLeft;
+            my = my - rect.top;//g2d_nativeStage.offsetTop;
+
+            // The Window property devicePixelRatio returns the ratio of the resolution in physical pixels to the
+            // resolution in CSS pixels for the current display device. This value could also be interpreted as the
+            // ratio of pixel sizes: the size of one CSS pixel to the size of one physical pixel. In simpler terms,
+            // this tells the browser how many of the screen's actual pixels should be used to draw a single CSS pixel.
+            // This is useful when dealing with the difference between rendering on a standard display versus a HiDPI
+            // or Retina display, which use more screen pixels to draw the same objects, resulting in a sharper image.
+            mx *= Browser.window.devicePixelRatio;
+            my *= Browser.window.devicePixelRatio;
+
             ctrlKey = te.ctrlKey;
             altKey = te.altKey;
             shiftKey = te.shiftKey;
