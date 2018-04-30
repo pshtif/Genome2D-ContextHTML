@@ -121,7 +121,8 @@ implements IGFocusable
     public var onResize(default,null):GCallback2<Int,Int>;
     public var onFrame(default,null):GCallback1<Float>;
     public var onMouseInput(default,null):GCallback1<GMouseInput>;
-    public var onKeyboardInput(default, null):GCallback1<GKeyboardInput>;
+    public var onKeyboardInput(default,null):GCallback1<GKeyboardInput>;
+    public var onVisibilityChange(default,null):GCallback1<Bool>;
 
     public var preventDefaultKeyboard:Bool = true;
 
@@ -140,6 +141,7 @@ implements IGFocusable
         onFrame = new GCallback1<Float>();
         onMouseInput = new GCallback1<GMouseInput>();
         onKeyboardInput = new GCallback1<GKeyboardInput>();
+        onVisibilityChange = new GCallback1<Bool>();
     }
 
     public function init():Void {
@@ -184,6 +186,8 @@ implements IGFocusable
         Browser.window.addEventListener("keyup", g2d_keyboardEventHandler);
         Browser.window.addEventListener("keydown", g2d_keyboardEventHandler);
         /**/
+
+        Browser.document.addEventListener("visibilitychange", g2d_visibilityChange_handler);
 
         g2d_nativeContext.pixelStorei(RenderingContext.UNPACK_PREMULTIPLY_ALPHA_WEBGL, RenderingContext.ONE);
 
@@ -520,6 +524,10 @@ implements IGFocusable
 
     private function g2d_contextEventHandler(event:Event):Void {
         event.preventDefault();
+    }
+
+    private function g2d_visibilityChange_handler(event:Event):Void {
+        onVisibilityChange.dispatch(Browser.document.hidden);
     }
 
     private function g2d_keyboardEventHandler(event:Event):Void {
