@@ -5,17 +5,16 @@ class GColorMatrixFilter extends GFilter {
 
     public function setMatrix(p_matrix:Array<Float>):Void {
         // Not cloning but keeping a reference, something to keep in mind. -- sHTiF
+
+        p_matrix[4] /= 255;
+        p_matrix[9] /= 255;
+        p_matrix[14] /= 255;
+        p_matrix[19] /= 255;
         g2d_fragmentConstants = p_matrix;
     }
 
     public function new() {
         super();
-
-        /*  Unpremul?
-            if (c.a > 0.0) {
-                  c.rgb /= c.a;
-                }
-         */
 
         fragmentCode = "
             precision lowp float;
@@ -29,6 +28,10 @@ class GColorMatrixFilter extends GFilter {
                 vec4 c = texture2D(sTexture, vTexCoord);
 
                 vec4 result;
+
+                if (c.a > 0.0) {
+                    c.rgb /= c.a;
+                }
 
                 result.r = (m[0] * c.r);
                     result.r += (m[1] * c.g);
