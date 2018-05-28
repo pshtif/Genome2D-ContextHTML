@@ -63,9 +63,7 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
 
     inline static private var FRAGMENT_SHADER_CODE_ALPHA:String =
     "
-			//#ifdef GL_ES
 			precision lowp float;
-			//#endif
 
 			varying vec2 vTexCoord;
 			varying vec4 vColor;
@@ -89,7 +87,15 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
     private var g2d_indexBuffer:Buffer;
 
     private var g2d_activeNativeTexture:Texture;
+    private var g2d_activeFilter:GFilter;
     private var g2d_activeAlpha:Bool = false;
+
+    private var g2d_defaultProgram:Dynamic;
+    private var g2d_currentProgram:Dynamic;
+    private var g2d_cachedFilterPrograms:Map<String,Program>;
+    private var g2d_vertexShader:Shader;
+    private var g2d_defaultFragmentShader:Shader;
+    private var g2d_previousFragmentShader:Shader;
 
     private var g2d_useSeparatedAlphaPipeline:Bool = false;
 
@@ -97,14 +103,41 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
     private var g2d_context:GWebGLContext;
 
     private var g2d_initialized:Int = -1;
-
-	public var g2d_program:Dynamic;
 	
 	public function new():Void {
     }
 
     public function getProgram():Program {
         return g2d_program;
+    }
+
+    private function getFilterProgram(p_filter:GFilter):Program {
+        var program:Dynamic = null;
+        if (g2d_cachedFilterPrograms == null) g2d_cachedFilterPrograms = new Map<String,Program>();
+        if (g2d_cachedFilterPrograms.exists(p_filter.id)) {
+            program = g2d_cachedFilterPrograms.get(p_filter.id);
+        } else {
+            var fragmentShader:Shader = getShader(p_filter.fragmentCode, RenderingContext.FRAGMENT_SHADER);
+            program = g2d_nativeContext.createProgram();
+            g2d_nativeContext.attachShader(program, g2d_vertexShader);
+            g2d_nativeContext.attachShader(program, fragmentShader);
+            g2d_nativeContext.linkProgram(program);
+
+            program.samplerUniform = g2d_nativeContext.getUniformLocation(program, "sTexture");
+
+            program.positionAttribute = g2d_nativeContext.getAttribLocation(program, "aPosition");
+            g2d_nativeContext.enableVertexAttribArray(program.positionAttribute);
+
+            program.texCoordAttribute = g2d_nativeContext.getAttribLocation(program, "aTexCoord");
+            g2d_nativeContext.enableVertexAttribArray(program.texCoordAttribute);
+
+            program.constantIndexAttribute = g2d_nativeContext.getAttribLocation(program, "aConstantIndex");
+            g2d_nativeContext.enableVertexAttribArray(program.constantIndexAttribute);
+
+            g2d_cachedFilterPrograms.set(p_filter.id, program);
+        }
+
+        return program;
     }
 
     private function getShader(shaderSrc:String, shaderType:Int):Shader {
@@ -123,14 +156,15 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
     public function initialize(p_context:GWebGLContext):Void {
         g2d_context = p_context;
 		g2d_nativeContext = g2d_context.getNativeContext();
-		
-		var fragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
-		var vertexShader = getShader(VERTEX_SHADER_CODE_ALPHA, RenderingContext.VERTEX_SHADER);
 
-		g2d_program = g2d_nativeContext.createProgram();
-		g2d_nativeContext.attachShader(g2d_program, vertexShader);
-		g2d_nativeContext.attachShader(g2d_program, fragmentShader);
-		g2d_nativeContext.linkProgram(g2d_program);
+        g2d_vertexShader = getShader(VERTEX_SHADER_CODE_ALPHA, RenderingContext.VERTEX_SHADER);
+		g2d_defaultFragmentShader = getShader(FRAGMENT_SHADER_CODE_ALPHA, RenderingContext.FRAGMENT_SHADER);
+        g2d_previousFragmentShader = g2d_defaultFragmentShader;
+
+		g2d_defaultProgram = g2d_nativeContext.createProgram();
+		g2d_nativeContext.attachShader(g2d_defaultProgram, g2d_vertexShader);
+		g2d_nativeContext.attachShader(g2d_defaultProgram, g2d_defaultFragmentShader);
+		g2d_nativeContext.linkProgram(g2d_defaultProgram);
 
 		//if (!RenderingContext.getProgramParameter(program, RenderingContext.LINK_STATUS)) { ("Could not initialise shaders"); }
 
@@ -223,15 +257,15 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices, RenderingContext.STATIC_DRAW);
 
-		g2d_program.samplerUniform = g2d_nativeContext.getUniformLocation(g2d_program, "sTexture");
+		g2d_defaultProgram.samplerUniform = g2d_nativeContext.getUniformLocation(g2d_program, "sTexture");
 
-        g2d_program.positionAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aPosition");
+        g2d_defaultProgram.positionAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aPosition");
         g2d_nativeContext.enableVertexAttribArray(g2d_program.positionAttribute);
 
-        g2d_program.texCoordAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aTexCoord");
+        g2d_defaultProgram.texCoordAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aTexCoord");
         g2d_nativeContext.enableVertexAttribArray(g2d_program.texCoordAttribute);
 
-        g2d_program.constantIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aConstantIndex");
+        g2d_defaultProgram.constantIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aConstantIndex");
         g2d_nativeContext.enableVertexAttribArray(g2d_program.constantIndexAttribute);
 
         g2d_transforms = new Float32Array(BATCH_SIZE * TRANSFORM_PER_VERTEX_ALPHA * 4);
@@ -240,20 +274,21 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
     public function bind(p_context:IGContext, p_reinitialize:Int):Void {
         if (p_reinitialize != g2d_initialized) initialize(cast p_context);
 		g2d_initialized = p_reinitialize;
-		
-		g2d_nativeContext.useProgram(g2d_program);
+
+        g2d_currentProgram = g2d_defaultProgram;
+		g2d_nativeContext.useProgram(g2d_defaultProgram);
 		
         // Bind camera matrix
         g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_geometryBuffer);
-        g2d_nativeContext.vertexAttribPointer(g2d_program.positionAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
+        g2d_nativeContext.vertexAttribPointer(g2d_defaultProgram.positionAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_uvBuffer);
-        g2d_nativeContext.vertexAttribPointer(g2d_program.texCoordAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
+        g2d_nativeContext.vertexAttribPointer(g2d_defaultProgram.texCoordAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
 
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_constantIndexAlphaBuffer);
-        g2d_nativeContext.vertexAttribPointer(g2d_program.constantIndexAttribute, 4, RenderingContext.FLOAT, false, 0, 0);
+        g2d_nativeContext.vertexAttribPointer(g2d_defaultProgram.constantIndexAttribute, 4, RenderingContext.FLOAT, false, 0, 0);
     }
 
 	@:access(com.genome2d.textures.GTexture)
@@ -261,17 +296,31 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
         var notSameTexture:Bool = g2d_activeNativeTexture != p_texture.nativeTexture;
         var useAlpha:Bool = !g2d_useSeparatedAlphaPipeline && !(p_red==1 && p_green==1 && p_blue==1 && p_alpha==1);
         var notSameUseAlpha:Bool = g2d_activeAlpha != useAlpha;
+        var notSameFilter:Bool = g2d_activeFilter != p_filter;
         // TODO: Change this if we implement separate alpha pipeline
         g2d_activeAlpha = useAlpha;
 
-        if (notSameTexture) {
+        if (notSameTexture || notSameFilter) {
             if (g2d_activeNativeTexture != null) push();
 
             if (notSameTexture) {
                 g2d_activeNativeTexture = p_texture.nativeTexture;
                 g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
                 g2d_nativeContext.bindTexture(RenderingContext.TEXTURE_2D, p_texture.nativeTexture);
-                untyped g2d_nativeContext.uniform1i(g2d_program.samplerUniform, 0);
+                untyped g2d_nativeContext.uniform1i(g2d_nativeContext.getUniformLocation(g2d_defaultProgram, "sTexture"), 0);
+            }
+
+            if (notSameFilter) {
+                if (g2d_activeFilter != null) g2d_activeFilter.clear(g2d_context);
+                g2d_activeFilter = p_filter;
+                if (g2d_activeFilter != null) {
+                    g2d_currentProgram = getFilterProgram(g2d_activeFilter);
+                    g2d_nativeContext.useProgram(g2d_currentProgram);
+                    g2d_activeFilter.bind(g2d_context, this, p_texture);
+                } else {
+                    g2d_currentProgram = g2d_defaultProgram;
+                    g2d_nativeContext.useProgram(g2d_currentProgram);
+                }
             }
         }
 
@@ -346,9 +395,9 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
         if (g2d_quadCount>0) {
             GStats.drawCalls++;
 
-			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_program, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
+			g2d_nativeContext.uniformMatrix4fv(g2d_nativeContext.getUniformLocation(g2d_currentProgram, "projectionMatrix"), false,  g2d_context.g2d_projectionMatrix.rawData);
 			
-            g2d_nativeContext.uniform4fv(g2d_nativeContext.getUniformLocation(g2d_program, "transforms"), g2d_transforms);
+            g2d_nativeContext.uniform4fv(g2d_nativeContext.getUniformLocation(g2d_currentProgram, "transforms"), g2d_transforms);
 
             g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, 6 * g2d_quadCount, RenderingContext.UNSIGNED_SHORT, 0);
 
