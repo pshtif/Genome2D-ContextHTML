@@ -147,8 +147,21 @@ class GTexture extends GTextureBase
 			}
 		} else {
 			//g2d_nativeImage = cast g2d_nativeSource;
+			g2d_gpuWidth = g2d_nativeWidth;
+			g2d_gpuHeight = g2d_nativeHeight;
 		}
     }
+
+	override public function getAlphaAtUV(p_u:Float, p_v:Float):UInt {
+		var imageData:ImageData = (Std.is(g2d_source, GTexture)) ? cast cast(g2d_source, GTexture).g2d_source : Std.is(g2d_source, ImageData) ? cast g2d_source : null;
+		if (imageData == null)  return 255;
+
+		p_u = (p_u * width) / g2d_gpuWidth;
+		p_v = (p_v * height) / g2d_gpuHeight;
+
+		var offset:Int = Std.int((g2d_u + p_u) * g2d_gpuWidth) + Std.int((g2d_v + p_v) * g2d_gpuHeight) * imageData.width;
+		return imageData.data[offset*4+3];
+	}
 
 	override public function dispose(p_disposeSource:Bool = false):Void {
 		if (g2d_sourceType != GTextureSourceType.TEXTURE && g2d_nativeTexture != null) cast (g2d_context,GWebGLContext).getNativeContext().deleteTexture(g2d_nativeTexture);

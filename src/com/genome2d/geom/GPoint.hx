@@ -16,4 +16,14 @@ class GPoint {
         x = p_x;
         y = p_y;
     }
+
+    static public function distance(point1:GPoint, point2:GPoint):Float {
+
+        var distX:Float = point2.x - point1.x;
+        distX *= distX;
+        var distY:Float = point2.y - point1.y;
+        distY *= distY;
+
+        return Math.sqrt(distX + distY);
+    }
 }
