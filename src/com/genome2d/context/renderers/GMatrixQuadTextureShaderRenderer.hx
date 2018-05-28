@@ -108,7 +108,7 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
     }
 
     public function getProgram():Program {
-        return g2d_program;
+        return g2d_currentProgram;
     }
 
     private function getFilterProgram(p_filter:GFilter):Program {
@@ -257,16 +257,16 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
         g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, indices, RenderingContext.STATIC_DRAW);
 
-		g2d_defaultProgram.samplerUniform = g2d_nativeContext.getUniformLocation(g2d_program, "sTexture");
+		g2d_defaultProgram.samplerUniform = g2d_nativeContext.getUniformLocation(g2d_defaultProgram, "sTexture");
 
-        g2d_defaultProgram.positionAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aPosition");
-        g2d_nativeContext.enableVertexAttribArray(g2d_program.positionAttribute);
+        g2d_defaultProgram.positionAttribute = g2d_nativeContext.getAttribLocation(g2d_defaultProgram, "aPosition");
+        g2d_nativeContext.enableVertexAttribArray(g2d_defaultProgram.positionAttribute);
 
-        g2d_defaultProgram.texCoordAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aTexCoord");
-        g2d_nativeContext.enableVertexAttribArray(g2d_program.texCoordAttribute);
+        g2d_defaultProgram.texCoordAttribute = g2d_nativeContext.getAttribLocation(g2d_defaultProgram, "aTexCoord");
+        g2d_nativeContext.enableVertexAttribArray(g2d_defaultProgram.texCoordAttribute);
 
-        g2d_defaultProgram.constantIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_program, "aConstantIndex");
-        g2d_nativeContext.enableVertexAttribArray(g2d_program.constantIndexAttribute);
+        g2d_defaultProgram.constantIndexAttribute = g2d_nativeContext.getAttribLocation(g2d_defaultProgram, "aConstantIndex");
+        g2d_nativeContext.enableVertexAttribArray(g2d_defaultProgram.constantIndexAttribute);
 
         g2d_transforms = new Float32Array(BATCH_SIZE * TRANSFORM_PER_VERTEX_ALPHA * 4);
 	}
