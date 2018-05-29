@@ -349,13 +349,6 @@ class GQuadTextureShaderRenderer implements IGRenderer
         if (notSameTexture || notSameFilter) {
             if (g2d_activeNativeTexture != null) push();
 
-            if (notSameTexture) {
-                g2d_activeNativeTexture = p_texture.nativeTexture;
-                g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
-                g2d_nativeContext.bindTexture(RenderingContext.TEXTURE_2D, p_texture.nativeTexture);
-                untyped g2d_nativeContext.uniform1i(g2d_nativeContext.getUniformLocation(g2d_defaultProgram, "sTexture"), 0);
-            }
-
             if (notSameFilter) {
                 if (g2d_activeFilter != null) g2d_activeFilter.clear(g2d_context);
                 //g2d_nativeContext.detachShader(g2d_program, g2d_previousFragmentShader);
@@ -373,6 +366,13 @@ class GQuadTextureShaderRenderer implements IGRenderer
                     //g2d_previousFragmentShader = g2d_defaultFragmentShader;
                     //g2d_nativeContext.attachShader(g2d_defaultProgram, g2d_previousFragmentShader);
                     //g2d_nativeContext.linkProgram(g2d_program);
+                }
+
+                if (notSameTexture) {
+                    g2d_activeNativeTexture = p_texture.nativeTexture;
+                    g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
+                    g2d_nativeContext.bindTexture(RenderingContext.TEXTURE_2D, p_texture.nativeTexture);
+                    untyped g2d_nativeContext.uniform1i(g2d_nativeContext.getUniformLocation(g2d_currentProgram, "sTexture"), 0);
                 }
             }
         }
