@@ -421,6 +421,20 @@ implements IGFocusable
         GRequestAnimationFrame.request(g2d_enterFrameHandler);
     }
 
+    private function getButtons(event:MouseEvent):Int {
+        if (untyped __js__('event.buttons!==void(0)')) {
+            return event.buttons;
+        }
+        if (untyped __js__('event.which!==void(0)')) {
+            return switch(event.which) {
+                case 2: 4;
+                case 3: 2;
+                default: event.which;
+            }
+        }
+        return 0;
+    }
+
     private function g2d_mouseEventHandler(event:Event):Void {
         var captured:Bool = false;
         event.preventDefault();
@@ -436,9 +450,10 @@ implements IGFocusable
         if (Std.is(event,WheelEvent)) {
             var we:WheelEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
+            var buttons:Int = getButtons(we);
             mx = we.pageX - rect.left;//g2d_nativeStage.offsetLeft;
             my = we.pageY - rect.top;//g2d_nativeStage.offsetTop;
-            buttonDown = we.buttons & 1 == 1;
+            buttonDown = buttons & 1 == 1;
             ctrlKey = we.ctrlKey;
             altKey = we.altKey;
             shiftKey = we.shiftKey;
@@ -449,21 +464,22 @@ implements IGFocusable
         } else if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
+            var buttons:Int = getButtons(me);
             mx = me.pageX - rect.left;//g2d_nativeStage.offsetLeft;
             my = me.pageY - rect.top;//g2d_nativeStage.offsetTop;
-            buttonDown = me.buttons & 1 == 1;
+            buttonDown = buttons & 1 == 1;
             // Right down check
-            if (me.buttons & 2 == 2) {
+            if (buttons & 2 == 2) {
                 buttonDown = isRight = true;
             }
             // Right up check
-            if ((g2d_lastMouseButtonsDown & 2 == 2) && (me.buttons & 2 != 2)) {
+            if ((g2d_lastMouseButtonsDown & 2 == 2) && (buttons & 2 != 2)) {
                 isRight = true;
             }
             ctrlKey = me.ctrlKey;
             altKey = me.altKey;
             shiftKey = me.shiftKey;
-            g2d_lastMouseButtonsDown = me.buttons;
+            g2d_lastMouseButtonsDown = buttons;
 
         } else {
             var te:TouchEvent = cast event;
