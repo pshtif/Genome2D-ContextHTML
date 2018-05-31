@@ -69,6 +69,7 @@ class GTexture extends GTextureBase
 				g2d_nativeTexture = parent.nativeTexture;
 				g2d_inverted = parent.g2d_inverted;
 				g2d_sourceType = GTextureSourceType.TEXTURE;
+				premultiplied = parent.premultiplied;
 			} else {
                 GDebug.error("Invalid texture source.");
             }
