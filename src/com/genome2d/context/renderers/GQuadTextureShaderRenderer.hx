@@ -440,5 +440,10 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
     public function clear():Void {
         g2d_activeNativeTexture = null;
+
+        if (g2d_activeFilter != null) {
+            g2d_activeFilter.clear(g2d_context);
+		    g2d_activeFilter = null;
+        }
     }
 }
