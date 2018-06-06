@@ -147,7 +147,7 @@ implements IGFocusable
     public function init():Void {
         try {
             g2d_nativeContext = g2d_nativeStage.getContext("webgl");
-            if (g2d_nativeContext == null) g2d_nativeContext = g2d_nativeStage.getContext("webgl");
+            if (g2d_nativeContext == null) g2d_nativeContext = g2d_nativeStage.getContext("experimental-webgl");
         } catch (e:Dynamic) {
         }
 
