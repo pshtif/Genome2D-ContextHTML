@@ -159,9 +159,8 @@ class G3DRenderer implements IGRenderer
 	
 	inline public static var STRIDE : Int = 24;
 	
-	public function new(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>, p_normals:Array<Float>, p_generatePerspectiveMatrix:Bool = false):Void {
+	public function invalidateGeometry(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>, p_normals:Array<Float>):Void {
 		g2d_vertices = new Float32Array(p_vertices.length);
-
 		for (i in 0...p_vertices.length) g2d_vertices[i] = p_vertices[i];
 		
 		g2d_uvs = new Float32Array(p_uvs.length);
@@ -172,6 +171,10 @@ class G3DRenderer implements IGRenderer
 		
 		g2d_indices = new Uint16Array(p_indices.length);
 		for (i in 0...p_indices.length) g2d_indices[i] = p_indices[i];
+	}
+	
+	public function new(p_vertices:Array<Float>, p_uvs:Array<Float>, p_indices:Array<UInt>, p_normals:Array<Float>, p_generatePerspectiveMatrix:Bool = false):Void {
+		invalidateGeometry(p_vertices, p_uvs, p_indices, p_normals);
 		
 		modelMatrix = new GMatrix3D();
 		cameraMatrix = new GMatrix3D();
@@ -268,17 +271,21 @@ class G3DRenderer implements IGRenderer
         g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_vertexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, g2d_vertices, RenderingContext.STREAM_DRAW);
 		untyped g2d_nativeContext.vertexAttribPointer(g2d_program.positionAttribute, 3, RenderingContext.FLOAT, false, 0, 0);
+		//GDebug.info("Vertices:", g2d_vertices.length);
 		
 		g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_uvBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, g2d_uvs, RenderingContext.STREAM_DRAW);
 		untyped g2d_nativeContext.vertexAttribPointer(g2d_program.uvAttribute, 2, RenderingContext.FLOAT, false, 0, 0);
+		//GDebug.info("UVs:", g2d_uvs.length);
 
 		g2d_nativeContext.bindBuffer(RenderingContext.ARRAY_BUFFER, g2d_normalBuffer);
 		g2d_nativeContext.bufferData(RenderingContext.ARRAY_BUFFER, g2d_normals, RenderingContext.STREAM_DRAW);
 		untyped g2d_nativeContext.vertexAttribPointer(g2d_program.normalAttribute, 3, RenderingContext.FLOAT, false, 0, 0);
+		//GDebug.info("Normals:", g2d_normals.length);
 		
 		g2d_nativeContext.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indexBuffer);
         g2d_nativeContext.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, g2d_indices, RenderingContext.STATIC_DRAW);
+		//GDebug.info("Indices:", g2d_indices.length);
 
 		g2d_nativeContext.drawElements(RenderingContext.TRIANGLES, g2d_indices.length, RenderingContext.UNSIGNED_SHORT, 0);
     }
