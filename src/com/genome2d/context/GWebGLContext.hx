@@ -451,8 +451,8 @@ implements IGFocusable
             var we:WheelEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             var buttons:Int = getButtons(we);
-            mx = we.pageX - rect.left;//g2d_nativeStage.offsetLeft;
-            my = we.pageY - rect.top;//g2d_nativeStage.offsetTop;
+            mx = we.clientX - rect.left;
+            my = we.clientY - rect.top;
             buttonDown = buttons & 1 == 1;
             ctrlKey = we.ctrlKey;
             altKey = we.altKey;
@@ -465,8 +465,8 @@ implements IGFocusable
             var me:MouseEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             var buttons:Int = getButtons(me);
-            mx = me.pageX - rect.left;//g2d_nativeStage.offsetLeft;
-            my = me.pageY - rect.top;//g2d_nativeStage.offsetTop;
+            mx = me.clientX - rect.left;
+            my = me.clientY - rect.top;
             buttonDown = buttons & 1 == 1;
             // Right down check
             if (buttons & 2 == 2) {
