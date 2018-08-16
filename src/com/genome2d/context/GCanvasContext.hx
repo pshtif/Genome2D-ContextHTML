@@ -352,8 +352,8 @@ class GCanvasContext implements IGContext
         if (Std.is(event,WheelEvent)) {
             var we:WheelEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
-            mx = we.pageX - rect.left;//g2d_nativeStage.offsetLeft;
-            my = we.pageY - rect.top;//g2d_nativeStage.offsetTop;
+            mx = we.clientX - rect.left;
+            my = we.clientY - rect.top;
             buttonDown = we.buttons & 1 == 1;
             ctrlKey = we.ctrlKey;
             altKey = we.altKey;
@@ -362,8 +362,8 @@ class GCanvasContext implements IGContext
         } else if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
-            mx = me.pageX - rect.left;//g2d_nativeStage.offsetLeft;
-            my = me.pageY - rect.top;//g2d_nativeStage.offsetTop;
+            mx = me.clientX - rect.left;
+            my = me.clientY - rect.top;
             buttonDown = me.buttons & 1 == 1;
             ctrlKey = me.ctrlKey;
             altKey = me.altKey;
