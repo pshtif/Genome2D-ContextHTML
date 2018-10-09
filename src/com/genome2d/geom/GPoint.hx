@@ -26,4 +26,9 @@ class GPoint {
 
         return Math.sqrt(distX + distY);
     }
+
+    public var length(get, never):Float;
+    inline private function get_length():Float {
+        return Math.sqrt(x*x + y*y);
+    }  
 }
