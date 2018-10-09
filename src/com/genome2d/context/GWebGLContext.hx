@@ -172,6 +172,7 @@ implements IGFocusable
         g2d_nativeStage.addEventListener("mousedown", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mouseup", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mousemove", g2d_mouseEventHandler);
+        g2d_nativeStage.addEventListener("mouseleave", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("wheel", g2d_mouseEventHandler);
 
         g2d_nativeStage.addEventListener("touchstart", g2d_mouseEventHandler);
@@ -447,6 +448,7 @@ implements IGFocusable
         var altKey:Bool = false;
         var shiftKey:Bool = false;
         var delta:Float = 0;
+        var mouseOut:Bool = false;
         if (Std.is(event,WheelEvent)) {
             var we:WheelEvent = cast event;
             var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
@@ -500,6 +502,9 @@ implements IGFocusable
         } else {
             input = new GMouseInput(this, this, GMouseInputType.fromNative(event.type), mx, my);
         }
+        if (event.type == 'mouseleave') {
+            mouseOut = true;
+        }
         input.worldX = input.contextX = mx;
         input.worldY = input.contextY = my;
         input.buttonDown = buttonDown;
@@ -508,6 +513,7 @@ implements IGFocusable
         input.shiftKey = shiftKey;
         input.delta = -Std.int(delta);
         input.nativeCaptured = captured;
+        input.mouseOut = mouseOut;
         onMouseInput.dispatch(input);
         g2d_onMouseInputInternal(input);
     }
