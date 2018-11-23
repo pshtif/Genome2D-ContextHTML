@@ -8,6 +8,7 @@
  */
 package com.genome2d.context;
 
+import js.html.Touch;
 import js.html.WheelEvent;
 import js.html.DOMRect;
 import com.genome2d.context.renderers.GTriangleTextureBufferCPURenderer;
@@ -126,6 +127,7 @@ implements IGFocusable
 
     public var preventDefaultKeyboard:Bool = true;
 
+    private var g2d_activeTouchIdentifier:Int = -1;
     private var g2d_lastMouseButtonsDown:Int = 0;
     public var g2d_onMouseInputInternal:GMouseInput->Void;
 
@@ -484,12 +486,45 @@ implements IGFocusable
             g2d_lastMouseButtonsDown = buttons;
 
         } else {
+            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             var te:TouchEvent = cast event;
-            mx = te.targetTouches[0].pageX;
-            my = te.targetTouches[0].pageY;
+            mx = -1;
+            my = -1;
+            
+            if (g2d_activeTouchIdentifier == -1) {
+                if (te.changedTouches.length > 0) {
+                    if (te.type == "touchstart") {
+                        mx = te.changedTouches[0].clientX - rect.left;
+                        my = te.changedTouches[0].clientY - rect.top;
+                        buttonDown = true;
+                        
+                        g2d_activeTouchIdentifier = te.changedTouches[0].identifier;
+                    }
+                }
+            } else {
+                for (touch in te.changedTouches) {
+                    if (touch.identifier == g2d_activeTouchIdentifier) {
+                        mx = touch.clientX - rect.left;
+                        my = touch.clientY - rect.top;
+                        buttonDown = true;
+                        
+                        if (te.type == "touchend" || te.type == "touchcancel") {
+                            buttonDown = false;
+                            g2d_activeTouchIdentifier = -1;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            if (mx == -1 && my == -1) {
+                return;
+            }
+            
             ctrlKey = te.ctrlKey;
             altKey = te.altKey;
             shiftKey = te.shiftKey;
+            g2d_lastMouseButtonsDown = buttonDown ? 1 : 0;
         }
 
         var input:GMouseInput = null;
