@@ -451,12 +451,14 @@ implements IGFocusable
         var shiftKey:Bool = false;
         var delta:Float = 0;
         var mouseOut:Bool = false;
+        var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
+        var scaleX:Float = g2d_stageViewRect.width/rect.width;
+        var scaleY:Float = g2d_stageViewRect.height/rect.height;
         if (Std.is(event,WheelEvent)) {
             var we:WheelEvent = cast event;
-            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             var buttons:Int = getButtons(we);
-            mx = we.clientX - rect.left;
-            my = we.clientY - rect.top;
+            mx = (we.clientX - rect.left)*scaleX;
+            my = (we.clientY - rect.top)*scaleY;
             buttonDown = buttons & 1 == 1;
             ctrlKey = we.ctrlKey;
             altKey = we.altKey;
@@ -467,10 +469,9 @@ implements IGFocusable
             }
         } else if (Std.is(event,MouseEvent)) {
             var me:MouseEvent = cast event;
-            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             var buttons:Int = getButtons(me);
-            mx = me.clientX - rect.left;
-            my = me.clientY - rect.top;
+            mx = (me.clientX - rect.left)*scaleX;
+            my = (me.clientY - rect.top)*scaleY;
             buttonDown = buttons & 1 == 1;
             // Right down check
             if (buttons & 2 == 2) {
@@ -486,7 +487,6 @@ implements IGFocusable
             g2d_lastMouseButtonsDown = buttons;
 
         } else {
-            var rect:DOMRect = g2d_nativeStage.getBoundingClientRect();
             var te:TouchEvent = cast event;
             mx = -1;
             my = -1;
@@ -494,8 +494,8 @@ implements IGFocusable
             if (g2d_activeTouchIdentifier == -1) {
                 if (te.changedTouches.length > 0) {
                     if (te.type == "touchstart") {
-                        mx = te.changedTouches[0].clientX - rect.left;
-                        my = te.changedTouches[0].clientY - rect.top;
+                        mx = (te.changedTouches[0].clientX - rect.left)*scaleX;
+                        my = (te.changedTouches[0].clientY - rect.top)*scaleY;
                         buttonDown = true;
                         
                         g2d_activeTouchIdentifier = te.changedTouches[0].identifier;
@@ -504,8 +504,8 @@ implements IGFocusable
             } else {
                 for (touch in te.changedTouches) {
                     if (touch.identifier == g2d_activeTouchIdentifier) {
-                        mx = touch.clientX - rect.left;
-                        my = touch.clientY - rect.top;
+                        mx = (touch.clientX - rect.left)*scaleX;
+                        my = (touch.clientY - rect.top)*scaleY;
                         buttonDown = true;
                         
                         if (te.type == "touchend" || te.type == "touchcancel") {
