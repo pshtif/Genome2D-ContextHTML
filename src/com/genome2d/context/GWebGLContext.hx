@@ -63,6 +63,7 @@ implements IGFocusable
         return false;
     }
 
+    private var g2d_contextLost:Bool = false;
     private var g2d_projectionMatrix:GProjectionMatrix;
     private var g2d_reinitialize:Int = 0;
     private var g2d_depthTestEnabled:Bool = false;
@@ -171,6 +172,9 @@ implements IGFocusable
         g2d_activeViewRect = new GRectangle();
         g2d_currentTime = Date.now().getTime();
 
+        g2d_nativeStage.addEventListener('webglcontextlost', g2d_contextLostEventHandler);
+        g2d_nativeStage.addEventListener('webglcontextrestored', g2d_contextRestoredEventHandler);
+        
         g2d_nativeStage.addEventListener("mousedown", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mouseup", g2d_mouseEventHandler);
         g2d_nativeStage.addEventListener("mousemove", g2d_mouseEventHandler);
@@ -255,6 +259,7 @@ implements IGFocusable
     }
 
     public function begin():Bool {
+        if (g2d_contextLost) return false;
         g2d_stats.clear();
         g2d_activeRenderer = null;
         g2d_activePremultiply = true;
@@ -438,6 +443,16 @@ implements IGFocusable
         return 0;
     }
 
+    private function g2d_contextLostEventHandler(event:Event):Void {
+        g2d_contextLost = true;
+        // NOTE: Call preventDefault to be able to restore context.
+    }
+    
+    private function g2d_contextRestoredEventHandler(event:Event):Void {
+        // NOTE: Re-create textures, buffers, shaders and programs for restored context before use.
+        // g2d_contextLost = false;
+    }
+    
     private function g2d_mouseEventHandler(event:Event):Void {
         var captured:Bool = false;
         event.preventDefault();
