@@ -97,6 +97,10 @@ class GTexture extends GTextureBase
 						if (filteringType == GTextureFilteringType.LINEAR) {
 							nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR);
 							nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
+						} else if (filteringType == GTextureFilteringType.LINEAR_MIPMAP_LINEAR) {
+							nativeContext.generateMipmap(RenderingContext.TEXTURE_2D);
+							nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.LINEAR_MIPMAP_LINEAR);
+							nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.LINEAR);
 						} else {
 							nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MIN_FILTER, RenderingContext.NEAREST);
 							nativeContext.texParameteri(RenderingContext.TEXTURE_2D, RenderingContext.TEXTURE_MAG_FILTER, RenderingContext.NEAREST);
