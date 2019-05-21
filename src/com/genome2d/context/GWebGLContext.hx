@@ -357,11 +357,11 @@ implements IGFocusable
     private var g2d_usedRenderTargets:Int = 0;
 
     public function getRenderTargetMatrix():GMatrix3D {
-        return null;
+        return g2d_renderTargetMatrix;
     }
 
     public function getRenderTarget():GTexture {
-        return null;
+        return g2d_renderTarget;
     }
 
     public function setRenderTarget(p_texture:GTexture = null, p_transform:GMatrix3D = null, p_clear:Bool = true):Void {
