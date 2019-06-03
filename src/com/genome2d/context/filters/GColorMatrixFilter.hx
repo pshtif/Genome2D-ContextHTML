@@ -1,9 +1,11 @@
 package com.genome2d.context.filters;
-import js.html.Float32Array;
+
+import com.genome2d.geom.GFloat;
 import com.genome2d.textures.GTexture;
+
 class GColorMatrixFilter extends GFilter {
 
-    public function setMatrix(p_matrix:Array<Float>):Void {
+    public function setMatrix(p_matrix:Array<GFloat>):Void {
         // Not cloning but keeping a reference, something to keep in mind. -- sHTiF
 
         p_matrix[4] /= 255;
