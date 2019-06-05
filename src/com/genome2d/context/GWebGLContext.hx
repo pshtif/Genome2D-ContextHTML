@@ -169,7 +169,7 @@ implements IGFocusable
         g2d_defaultCamera.x = g2d_stageViewRect.width / 2;
         g2d_defaultCamera.y = g2d_stageViewRect.height / 2;
 
-        g2d_activeViewRect = new GRectangle();
+        g2d_activeViewRect = new GRectangle(0, 0, 0, 0);
         g2d_currentTime = Date.now().getTime();
 
         g2d_nativeStage.addEventListener('webglcontextlost', g2d_contextLostEventHandler);

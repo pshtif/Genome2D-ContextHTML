@@ -31,7 +31,7 @@ class GRectangle {
     public var width:Float;
     public var height:Float;
 
-    public function new(p_x:Float=0, p_y:Float=0, p_width:Float=0, p_height:Float=0) {
+    public function new(p_x:Float, p_y:Float, p_width:Float, p_height:Float) {
         x = p_x;
         y = p_y;
         width = p_width;
@@ -55,12 +55,12 @@ class GRectangle {
         var x0 = x < p_rect.x ? p_rect.x : x;
         var x1 = right > p_rect.right ? p_rect.right : right;
         if (x1 <= x0) {
-            result = new GRectangle ();
+            result = new GRectangle (0, 0, 0, 0);
         } else {
             var y0 = y < p_rect.y ? p_rect.y : y;
             var y1 = bottom > p_rect.bottom ? p_rect.bottom : bottom;
             if (y1 <= y0) {
-                result = new GRectangle ();
+                result = new GRectangle (0, 0, 0, 0);
             } else {
                 result = new GRectangle (x0, y0, x1 - x0, y1 - y0);
             }
