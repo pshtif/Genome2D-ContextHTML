@@ -12,7 +12,7 @@ class GPoint {
     public var x:Float;
     public var y:Float;
 
-    public function new(p_x:Float = 0, p_y:Float = 0) {
+    public function new(p_x:Float, p_y:Float) {
         x = p_x;
         y = p_y;
     }
@@ -30,5 +30,5 @@ class GPoint {
     public var length(get, never):Float;
     inline private function get_length():Float {
         return Math.sqrt(x*x + y*y);
-    }  
+    }
 }
