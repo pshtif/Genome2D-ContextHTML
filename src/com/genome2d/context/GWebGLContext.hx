@@ -26,6 +26,7 @@ import js.html.KeyboardEvent;
 import js.html.webgl.RenderingContext;
 import js.Browser;
 
+import com.genome2d.debug.GDebug;
 import com.genome2d.callbacks.GCallback.GCallback0;
 import com.genome2d.callbacks.GCallback.GCallback1;
 import com.genome2d.callbacks.GCallback.GCallback2;
@@ -495,6 +496,10 @@ implements IGFocusable
             // Right up check
             if ((g2d_lastMouseButtonsDown & 2 == 2) && (buttons & 2 != 2)) {
                 isRight = true;
+            }
+            // Hack to avoid wheel as a button
+            if (buttons & 4 == 4 && event.type == "mousedown") {
+                return;
             }
             ctrlKey = me.ctrlKey;
             altKey = me.altKey;
