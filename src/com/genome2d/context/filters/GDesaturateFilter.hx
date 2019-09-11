@@ -20,7 +20,7 @@ class GDesaturateFilter extends GFilter {
 			    vec4 mainColor = texture2D(sTexture, vTexCoord);
 			    mainColor = vec4(vec3(dot(mainColor.xyz, vec3(0.3, 0.59, 0.11))), mainColor.w);
 
-				gl_FragColor = mainColor;
+				gl_FragColor = mainColor * vColor;
 			}
 	    ";
     }

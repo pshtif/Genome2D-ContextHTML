@@ -21,6 +21,7 @@ class GColorMatrixFilter extends GFilter {
         fragmentCode = "
             precision lowp float;
 
+            varying vec4 vColor;
             varying vec2 vTexCoord;
             uniform sampler2D sTexture;
             uniform float m[20];
@@ -62,7 +63,7 @@ class GColorMatrixFilter extends GFilter {
                 // Premultiply alpha again.
                 result.rgb *= result.a;
 
-                gl_FragColor = vec4(result.rgb, result.a);
+                gl_FragColor = vec4(result.rgb, result.a) * vColor;
             }
 	    ";
     }
