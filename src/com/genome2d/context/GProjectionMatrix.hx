@@ -16,21 +16,28 @@ class GProjectionMatrix extends GMatrix3D
     static public var FAR:Int = 4000;
 	static private var g2d_instance:GProjectionMatrix;
 
-    public function new(p_raw:Array<Float> = null) {
-		super(p_raw);
-        rawData =  new Float32Array([2.0 , 0.0  , 0.0           , 0.0,
-									0.0  , -2.0 , 0.0           , 0.0,
-									0.0  , 0.0  , 1/(FAR-NEAR) , -NEAR/(FAR-NEAR),
-									-1.0 , 1.0  , 0             , 1.0
-									]);
+    public function new() {
+		super();
+
+        reset();
     }
 
-    static public function getOrtho(p_width:Float, p_height:Float, p_transform:GMatrix3D = null):GProjectionMatrix {
+    static public function getOrtho(p_width:Float, p_height:Float, p_transform:GMatrix3D):GProjectionMatrix {
         if (g2d_instance == null) g2d_instance = new GProjectionMatrix();
         return g2d_instance.ortho(p_width, p_height, p_transform);
     }
+    
+    public function reset():Void
+    {
+        rawData =  new Float32Array(
+            [2.0 , 0.0  , 0.0           , 0.0,
+            0.0  , -2.0 , 0.0           , 0.0,
+            0.0  , 0.0  , 1/(FAR-NEAR) , -NEAR/(FAR-NEAR),
+            -1.0 , 1.0  , 0             , 1.0
+            ]);
+    }
 
-    public function ortho(p_width:Float, p_height:Float, p_transform:GMatrix3D = null):GProjectionMatrix {
+    public function ortho(p_width:Float, p_height:Float, p_transform:GMatrix3D):GProjectionMatrix {
         rawData[0] = 2 / p_width;
         rawData[5] = -2 / p_height;
 
@@ -40,7 +47,7 @@ class GProjectionMatrix extends GMatrix3D
     }
 	
 	// Render to texture needs different ortho matrix?!?
-	public function orthoRtt(p_width:Float, p_height:Float, p_transform:GMatrix3D = null):GProjectionMatrix {
+	public function orthoRtt(p_width:Float, p_height:Float, p_transform:GMatrix3D):GProjectionMatrix {
         rawData[0] = 2 / p_width;
         rawData[5] = -2 / p_height;
 

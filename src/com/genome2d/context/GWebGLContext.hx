@@ -65,7 +65,7 @@ implements IGFocusable
     }
 
     private var g2d_contextLost:Bool = false;
-    private var g2d_projectionMatrix:GProjectionMatrix;
+    private var g2d_projectionMatrix:GProjectionMatrix = new GProjectionMatrix();
     private var g2d_reinitialize:Int = 0;
     private var g2d_depthTestEnabled:Bool = false;
 
@@ -228,11 +228,11 @@ implements IGFocusable
         var vx:Float = g2d_activeViewRect.x + g2d_activeViewRect.width*.5;
         var vy:Float = g2d_activeViewRect.y + g2d_activeViewRect.height * .5;
 
-        g2d_projectionMatrix = new GProjectionMatrix();
-        g2d_projectionMatrix.ortho(g2d_stageViewRect.width, g2d_stageViewRect.height);
+        g2d_projectionMatrix.reset();
+        g2d_projectionMatrix.ortho(g2d_stageViewRect.width, g2d_stageViewRect.height, null);
 
         g2d_projectionMatrix.prependTranslation(vx, vy, 0);
-        g2d_projectionMatrix.prependRotation(g2d_activeCamera.rotation*180/Math.PI, GVector3D.Z_AXIS, new GVector3D());
+        g2d_projectionMatrix.prependRotation(g2d_activeCamera.rotation*180/Math.PI, GVector3D.Z_AXIS, null);
         g2d_projectionMatrix.prependScale(g2d_activeCamera.scaleX, g2d_activeCamera.scaleY, 1);
         g2d_projectionMatrix.prependTranslation(-g2d_activeCamera.x, -g2d_activeCamera.y, 0);
 
@@ -397,8 +397,8 @@ implements IGFocusable
             }
 
             if (p_transform != null) MGDebug.G2D_WARNING("setRenderTarget p_transform argument is not supported for this target.");
-            g2d_projectionMatrix = new GProjectionMatrix();
-            g2d_projectionMatrix.orthoRtt(p_texture.nativeWidth, p_texture.nativeHeight);
+            g2d_projectionMatrix.reset();
+            g2d_projectionMatrix.orthoRtt(p_texture.nativeWidth, p_texture.nativeHeight, null);
             g2d_projectionMatrix.transpose();
             g2d_nativeContext.disable(RenderingContext.SCISSOR_TEST);
         }
