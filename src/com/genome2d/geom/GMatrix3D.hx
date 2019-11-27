@@ -74,7 +74,7 @@ class GMatrix3D {
 		rawData[15] = m141 * m214 + m142 * m224 + m143 * m234 + m144 * m244;		
 	}
 	
-	public function appendRotation(p_degrees:Float, p_axis:GVector3D, p_pivotPoint:GVector3D):Void {	
+	public function appendRotation(p_degrees:Float, p_axis:GVector3D, p_pivotPoint:GVector3D = null):Void {	
 		var m = g2d_getAxisRotation(p_axis.x, p_axis.y, p_axis.z, p_degrees);
 		
 		if (p_pivotPoint != null) {
