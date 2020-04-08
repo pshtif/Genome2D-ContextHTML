@@ -140,6 +140,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
 
     private var g2d_initialized:Int = -1;
     private var g2d_activeFilter:GFilter;
+    private var g2d_activeTextureNeedsRebind:Bool = false;
 
 	private var g2d_defaultProgram:Dynamic;
     private var g2d_currentProgram:Dynamic;
@@ -346,7 +347,7 @@ class GQuadTextureShaderRenderer implements IGRenderer
         // TODO: Change this if we implement separate alpha pipeline
         g2d_activeAlpha = useAlpha;
 
-        if (notSameTexture || notSameFilter) {
+        if (notSameTexture || notSameFilter || g2d_activeTextureNeedsRebind) {
             if (g2d_activeNativeTexture != null) push();
 
             if (notSameFilter) {
@@ -369,7 +370,9 @@ class GQuadTextureShaderRenderer implements IGRenderer
                 }
             }
 
-            if (notSameTexture) {
+            if (notSameTexture || g2d_activeTextureNeedsRebind) {
+                g2d_activeTextureNeedsRebind = false;
+
                 g2d_activeNativeTexture = p_texture.nativeTexture;
                 g2d_nativeContext.activeTexture(RenderingContext.TEXTURE0);
                 g2d_nativeContext.bindTexture(RenderingContext.TEXTURE_2D, p_texture.nativeTexture);
@@ -438,8 +441,15 @@ class GQuadTextureShaderRenderer implements IGRenderer
         }
     }
 
+    public function activeTextureNeedsRebind():Void {
+        if (g2d_activeNativeTexture != null) {
+            g2d_activeTextureNeedsRebind = true;
+        }
+    }
+
     public function clear():Void {
         g2d_activeNativeTexture = null;
+        g2d_activeTextureNeedsRebind = false;
 
         if (g2d_activeFilter != null) {
             g2d_activeFilter.clear(g2d_context);
