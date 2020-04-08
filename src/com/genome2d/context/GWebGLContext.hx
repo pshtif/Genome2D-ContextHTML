@@ -401,6 +401,9 @@ implements IGFocusable
             g2d_projectionMatrix.orthoRtt(p_texture.nativeWidth, p_texture.nativeHeight, null);
             g2d_projectionMatrix.transpose();
             g2d_nativeContext.disable(RenderingContext.SCISSOR_TEST);
+
+            // Indicate that active texture needs rebind after frame buffer change
+            g2d_drawRenderer.activeTextureNeedsRebind();
         }
 
         g2d_renderTargetMatrix = p_transform;
