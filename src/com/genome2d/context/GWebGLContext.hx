@@ -19,12 +19,12 @@ import com.genome2d.geom.GVector3D;
 import com.genome2d.macros.MGDebug;
 import js.html.CanvasElement;
 import js.html.TouchEvent;
-import js.html.Float32Array;
 import js.html.Event;
 import js.html.MouseEvent;
 import js.html.KeyboardEvent;
 import js.html.webgl.RenderingContext;
 import js.Browser;
+#if (haxe_ver < 4) import js.html.Float32Array; #else import js.lib.Float32Array; #end
 
 import com.genome2d.debug.GDebug;
 import com.genome2d.callbacks.GCallback.GCallback0;
@@ -434,10 +434,12 @@ implements IGFocusable
     }
 
     private function getButtons(event:MouseEvent):Int {
-        if (untyped __js__('event.buttons!==void(0)')) {
+        var buttonsExists = #if (haxe_ver < 4) untyped __js__('event.buttons!==void(0)'); #else js.Syntax.code('{0}!==void(0)', event.buttons); #end
+        if (buttonsExists) {
             return event.buttons;
         }
-        if (untyped __js__('event.which!==void(0)')) {
+        var whichExists = #if (haxe_ver < 4) untyped __js__('event.which!==void(0)'); #else js.Syntax.code('{0}!==void(0)', event.which); #end
+        if (whichExists) {
             return switch(event.which) {
                 case 2: 4;
                 case 3: 2;

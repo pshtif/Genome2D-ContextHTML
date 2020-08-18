@@ -1,10 +1,10 @@
 package com.genome2d.assets;
-import com.genome2d.debug.GDebug;
-import js.html.ArrayBuffer;
+
 import com.genome2d.macros.MGDebug;
+import haxe.io.Bytes;
 import js.html.XMLHttpRequestResponseType;
 import js.html.XMLHttpRequest;
-import haxe.io.Bytes;
+#if (haxe_ver < 4) import js.html.ArrayBuffer; #else import js.lib.ArrayBuffer; #end
 
 class GBinaryAsset extends GAsset {
 
