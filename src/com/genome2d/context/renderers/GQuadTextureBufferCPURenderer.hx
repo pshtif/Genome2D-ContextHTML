@@ -16,7 +16,6 @@ import js.html.webgl.Program;
 import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
-import js.html.Float32Array;
 
 class GQuadTextureBufferCPURenderer
 {

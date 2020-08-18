@@ -8,7 +8,6 @@
  */
 package com.genome2d.context.renderers;
 
-import js.html.Uint16Array;
 import com.genome2d.context.filters.GFilter;
 import com.genome2d.textures.GTexture;
 import com.genome2d.debug.GDebug;
@@ -19,7 +18,8 @@ import js.html.webgl.Program;
 import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
-import js.html.Float32Array;
+#if (haxe_ver < 4) import js.html.Uint16Array; #else import js.lib.Uint16Array; #end
+#if (haxe_ver < 4) import js.html.Float32Array; #else import js.lib.Float32Array; #end
 
 @:access(com.genome2d.textures.GTexture)
 class GTriangleTextureBufferCPURenderer implements IGRenderer

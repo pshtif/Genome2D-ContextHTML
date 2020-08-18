@@ -16,14 +16,14 @@ import com.genome2d.context.IGRenderer;
 import com.genome2d.context.IGContext;
 import com.genome2d.debug.GDebug;
 import com.genome2d.textures.GTexture;
-import js.html.Uint16Array;
 import js.html.webgl.Texture;
 import js.html.webgl.Shader;
 import js.html.webgl.Program;
 import js.html.webgl.Buffer;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
-import js.html.Float32Array;
+#if (haxe_ver < 4) import js.html.Uint16Array; #else import js.lib.Uint16Array; #end
+#if (haxe_ver < 4) import js.html.Float32Array; #else import js.lib.Float32Array; #end
 
 class GQuadTextureShaderRenderer implements IGRenderer
 {

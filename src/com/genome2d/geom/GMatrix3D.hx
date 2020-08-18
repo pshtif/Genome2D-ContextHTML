@@ -8,7 +8,7 @@
  */
 package com.genome2d.geom;
 
-import js.html.Float32Array;
+#if (haxe_ver < 4) import js.html.Float32Array; #else import js.lib.Float32Array; #end
 
 class GMatrix3D {
 	private static var helperMatrix:GMatrix3D = new GMatrix3D();

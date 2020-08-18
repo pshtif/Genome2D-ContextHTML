@@ -7,8 +7,9 @@
  *	License:: ./doc/LICENSE.md (https://github.com/pshtif/Genome2D/blob/master/LICENSE.md)
  */
 package com.genome2d.context;
+
 import com.genome2d.geom.GMatrix3D;
-import js.html.Float32Array;
+#if (haxe_ver < 4) import js.html.Float32Array; #else import js.lib.Float32Array; #end
 
 class GProjectionMatrix extends GMatrix3D
 {

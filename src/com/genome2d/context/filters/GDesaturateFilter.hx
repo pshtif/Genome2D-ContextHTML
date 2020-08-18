@@ -1,6 +1,7 @@
 package com.genome2d.context.filters;
-import haxe.io.Float32Array;
+
 import com.genome2d.textures.GTexture;
+
 class GDesaturateFilter extends GFilter {
 
     public function new() {
