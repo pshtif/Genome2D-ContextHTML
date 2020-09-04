@@ -149,7 +149,8 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
         if (!g2d_nativeContext.getShaderParameter(shader, RenderingContext.COMPILE_STATUS)) {
             GDebug.error("Shader compilation error: " + g2d_nativeContext.getShaderInfoLog(shader)); return null;
         }
-        /**/
+        /*
+        */
         return shader;
     }
 
@@ -363,7 +364,8 @@ class GMatrixQuadTextureShaderRenderer implements IGRenderer
             p_green*=p_alpha;
             p_blue*=p_alpha;
         }
-        /**/
+        /*
+        */
         var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA<<2;
         g2d_transforms[offset] = p_a;
         g2d_transforms[offset+1] = p_c;

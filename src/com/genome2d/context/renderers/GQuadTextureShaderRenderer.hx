@@ -75,7 +75,8 @@ class GQuadTextureShaderRenderer implements IGRenderer
 				gl_FragColor = texColor;
 			}
 		";
-    /**/
+    /*
+    */
     inline static private var VERTEX_SHADER_CODE_ALPHA:String =
     "
 			uniform mat4 projectionMatrix;
@@ -195,7 +196,8 @@ class GQuadTextureShaderRenderer implements IGRenderer
         if (!g2d_nativeContext.getShaderParameter(shader, RenderingContext.COMPILE_STATUS)) {
             GDebug.error("Shader compilation error: " + g2d_nativeContext.getShaderInfoLog(shader)); return null;
         }
-        /**/
+        /*
+        */
         return shader;
     }
 
@@ -386,7 +388,8 @@ class GQuadTextureShaderRenderer implements IGRenderer
             p_green*=p_alpha;
             p_blue*=p_alpha;
         }
-        /**/
+        /*
+        */
         var offset:Int = g2d_quadCount*TRANSFORM_PER_VERTEX_ALPHA<<2;
         g2d_transforms[offset] = p_x;
         g2d_transforms[offset+1] = p_y;
