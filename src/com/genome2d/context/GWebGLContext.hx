@@ -193,7 +193,8 @@ implements IGFocusable
 
         Browser.window.addEventListener("keyup", g2d_keyboardEventHandler);
         Browser.window.addEventListener("keydown", g2d_keyboardEventHandler);
-        /**/
+        /*
+        */
 
         Browser.document.addEventListener("visibilitychange", g2d_visibilityChange_handler);
 
@@ -297,7 +298,8 @@ implements IGFocusable
             setRenderer(g2d_matrixQuadTextureShaderRenderer);
             g2d_matrixQuadTextureShaderRenderer.draw(p_a, p_b, p_c, p_d, p_tx, p_ty, p_red, p_green, p_blue, p_alpha, p_texture, p_filter, false, 0, 0, 0, 0);
         }
-        /**/
+        /*
+        */
     }
 
     public function drawSource(p_texture:GTexture, p_blendMode:GBlendMode, p_sourceX:Float, p_sourceY:Float, p_sourceWidth:Float, p_sourceHeight:Float, p_sourcePivotX:Float, p_sourcePivotY:Float, p_x:Float, p_y:Float, p_scaleX:Float, p_scaleY:Float, p_rotation:Float, p_red:Float, p_green:Float, p_blue:Float, p_alpha:Float, p_filter:GFilter):Void {

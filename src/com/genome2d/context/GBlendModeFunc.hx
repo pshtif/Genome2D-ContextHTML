@@ -48,7 +48,8 @@ class GBlendModeFunc
 		
 		return blendFactors[0].length;
 	}
-	/**/
+	/*
+	*/
 	
 	static public function setBlendMode(p_context:RenderingContext, p_mode:GBlendMode, p_premultiplied:Bool):Void {
 		var p:Int = (p_premultiplied) ? 1 : 0;

@@ -195,5 +195,6 @@ class GQuadTextureBufferCPURenderer
     public function clear():Void {
         g2d_activeNativeTexture = null;
     }
-    /**/
+    /*
+    */
 }
