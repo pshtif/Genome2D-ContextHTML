@@ -32,6 +32,7 @@ class GContextConfig
 	public var enableDepthAndStencil:Bool = false;
 	public var enableErrorChecking:Bool = false;
 	public var antiAliasing:Int = 0;
+    public var failIfMajorPerformanceCaveat:Bool = false;
 	
     public function new(?p_stage:CanvasElement, ?p_viewRect:GRectangle = null, ?p_useClientSize:Bool = false) {
 		nativeStage = (p_stage == null) ? cast Browser.document.getElementById("canvas") : p_stage;

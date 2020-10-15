@@ -131,11 +131,13 @@ implements IGFocusable
 
     private var g2d_activeTouchIdentifier:Int = -1;
     private var g2d_lastMouseButtonsDown:Int = 0;
+    private var g2d_failIfMajorPerformanceCaveat:Bool = false;
     public var g2d_onMouseInputInternal:GMouseInput->Void;
 
     public function new(p_config:GContextConfig) {
         g2d_nativeStage = p_config.nativeStage;
         g2d_stageViewRect = p_config.viewRect;
+        g2d_failIfMajorPerformanceCaveat = p_config.failIfMajorPerformanceCaveat;
         g2d_stats = new GStats(g2d_nativeStage);
 
         onInitialized = new GCallback0();
@@ -150,8 +152,11 @@ implements IGFocusable
 
     public function init():Void {
         try {
-            g2d_nativeContext = g2d_nativeStage.getContext("webgl");
-            if (g2d_nativeContext == null) g2d_nativeContext = g2d_nativeStage.getContext("experimental-webgl");
+            var contextAttributes = {
+                failIfMajorPerformanceCaveat: g2d_failIfMajorPerformanceCaveat
+            };
+            g2d_nativeContext = g2d_nativeStage.getContext("webgl", contextAttributes);
+            if (g2d_nativeContext == null) g2d_nativeContext = g2d_nativeStage.getContext("experimental-webgl", contextAttributes);
         } catch (e:Dynamic) {
         }
 
