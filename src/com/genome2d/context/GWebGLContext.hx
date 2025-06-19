@@ -427,6 +427,7 @@ implements IGFocusable
     }
 
     private function g2d_enterFrameHandler():Void {
+        GRequestAnimationFrame.request(g2d_enterFrameHandler);
         var currentTime:Float = Date.now().getTime();
         g2d_currentDeltaTime = currentTime - g2d_currentTime;
         g2d_currentTime = currentTime;
@@ -436,8 +437,7 @@ implements IGFocusable
             g2d_nextFrameCallback = null;
             callback();
         }
-        onFrame.dispatch(g2d_currentDeltaTime);
-        GRequestAnimationFrame.request(g2d_enterFrameHandler);
+        onFrame.dispatch(g2d_currentDeltaTime);        
     }
 
     private function getButtons(event:MouseEvent):Int {
