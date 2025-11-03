@@ -601,7 +601,13 @@ implements IGFocusable
 
         var keyEvent:KeyboardEvent = cast event;
 
-        var input:GKeyboardInput = new GKeyboardInput(GKeyboardInputType.fromNative(event.type), keyEvent.keyCode, keyEvent.key.charCodeAt(0));
+        //On some OS keyEvent.key can be null
+        var charcode = 0;
+        if (keyEvent.key != null && keyEvent.key.length > 0){
+            charcode = keyEvent.key.charCodeAt(0);
+        }
+
+        var input:GKeyboardInput = new GKeyboardInput(GKeyboardInputType.fromNative(event.type), keyEvent.keyCode, charcode);
         onKeyboardInput.dispatch(input);
     }
 
